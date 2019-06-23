@@ -1,0 +1,17 @@
+{
+  "name": "worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node worker.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cpu-stat": "^2.0.1",
+    "death": "^1.1.0",
+    "socket.io-client": "^2.2.0",
+    "uuid": "^3.3.2"
+  }
+}

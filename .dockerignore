@@ -1,0 +1,11 @@
+**/obj
+**/bin
+**/*.sh
+**/*.md
+**/.circleci
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/Dockerfile
+**/node_modules

@@ -1,0 +1,17 @@
+FROM arm32v7/node:11-slim
+
+LABEL maintainer="pabloromeo"
+
+COPY qemu-arm-static /usr/bin/
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3500
+
+CMD ["node", "server.js"]
+
