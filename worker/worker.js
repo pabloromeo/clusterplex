@@ -9,7 +9,7 @@ var server = require('http').createServer(app);
 var socket = require('socket.io-client')(ORCHESTRATOR_URL);
 var cpuStat = require('cpu-stat');
 const { spawn } = require('child_process');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 
 var ON_DEATH = require('death')({debug: true})
 
@@ -39,6 +39,8 @@ setInterval( () => {
 
 let workerId = uuid()
 let taskMap = new Map()
+
+console.debug(`Initializing Worker ${workerId}|${process.env.HOSTNAME}`)
 
 socket.on('connect', () => {
     console.log(`Worker connected on socket ${socket.id}`)
