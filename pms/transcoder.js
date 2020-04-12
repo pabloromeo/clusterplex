@@ -11,7 +11,7 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
 
 const { spawn } = require('child_process');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 var ON_DEATH = require('death')({debug: true})
 
 let uniqueId = uuid()

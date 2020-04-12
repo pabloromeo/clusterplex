@@ -1,6 +1,14 @@
-const uuid = require('uuid/v4');
-
+const { v4: uuid } = require('uuid');
 const STREAM_SPLITTING = process.env.STREAM_SPLITTING || 'OFF'
+
+// selection strategies:
+// RR : Round-Robin
+// LOAD: Lowest CPU load
+// TASK: Lowest task count
+const WORKER_SELECTION_STRATEGY_RR = 'RR'
+const WORKER_SELECTION_STRATEGY_LOAD_CPU = 'LOAD_CPU'
+const WORKER_SELECTION_STRATEGY_LOAD_TASKS = 'LOAD_TASKS'
+const WORKER_SELECTION_STRATEGY = process.env.WORKER_SELECTION_STRATEGY || WORKER_SELECTION_STRATEGY_LOAD_CPU
 
 class Worker {
     constructor(id, socketId, host) {
@@ -17,7 +25,7 @@ class Worker {
 class WorkerSet {
     constructor() {
         this.workers = new Map()
-        this.roundRobinIndex = -1
+        this.workerSelectionStrategy = this.getWorkerSelectionStrategy()
     }
 
     register(worker) {
@@ -48,16 +56,61 @@ class WorkerSet {
     }
 
     getNextAvailableWorker() {
-        if (this.workers.size == 0)
+        if (this.workers.size == 0) {
             return null
-            
+        }
+        return this.workerSelectionStrategy(); 
+    }
+
+    updateStats(socketId, stats) {
+        var worker = this.findBySocketId(socketId)
+        if (worker) {
+            worker.stats = stats
+        }
+        else {
+            console.warn(`Received stats from unregistered worker on socket ${socketId}`)
+        }
+    }
+
+    size() {
+        return this.workers.size
+    }
+
+    getWorkerSelectionStrategy() {
+        console.debug(`Using Worker Selection Strategy: ${WORKER_SELECTION_STRATEGY}`)
+
+        switch (WORKER_SELECTION_STRATEGY) {
+            case WORKER_SELECTION_STRATEGY_RR:
+                this.roundRobinIndex = -1
+                return this.roundRobinSelector
+            case WORKER_SELECTION_STRATEGY_LOAD_CPU:
+                return this.loadBasedSelector
+            case WORKER_SELECTION_STRATEGY_LOAD_TASKS:
+                return this.taskLoadBasedSelector
+        }
+    }
+    roundRobinSelector() {
         let currentWorkers = Array.from(this.workers.values())
         this.roundRobinIndex = (this.roundRobinIndex + 1) % currentWorkers.length
         return currentWorkers[this.roundRobinIndex]
     }
 
-    size() {
-        return this.workers.size
+    loadBasedSelector() {
+        let currentWorkers = Array.from(this.workers.values())
+        if (currentWorkers.length > 0) {
+            return currentWorkers.reduce((a,b) => a.stats.cpu < b.stats.cpu ? a : b)
+        } else {
+            return null
+        }
+    }
+
+    taskLoadBasedSelector() {
+        let currentWorkers = Array.from(this.workers.values())
+        if (currentWorkers.length > 0) {
+            return currentWorkers.reduce((a,b) => a.stats.tasks < b.stats.tasks ? a : b)
+        } else {
+            return null
+        }
     }
 }
 
@@ -221,7 +274,6 @@ module.exports.init = (server) => {
     console.log('Initializing orchestrator')
 
     const io = require('socket.io')(server, {
-        path: '/',
         serveClient: false
     });
 
@@ -389,6 +441,10 @@ module.exports.init = (server) => {
     io.on('connection', socket => {
         console.log(`Client connected: ${socket.id}`)
 
+        socket.on('worker.stats', stats => {
+            workers.updateStats(socket.id, stats)
+        })
+
         socket.on('worker.announce', data => {
             const worker = new Worker(data.workerId, socket.id, data.host);
             workers.register(worker)
@@ -426,7 +482,6 @@ module.exports.init = (server) => {
                 disconnectionHandlers.delete(socket.id)
             }
         })
-
     })
     console.log('Ready')
 }

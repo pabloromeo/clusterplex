@@ -1,14 +1,20 @@
-var ON_DEATH = require('death')({debug: true})
-var orchestrator = require('./orchestrator')
-const server = require('http').createServer();
+const LISTENING_PORT = process.env.LISTENING_PORT || 3500
 
-const port = 3500
+var ON_DEATH = require('death')({debug: true})
+var app = require('express')();
+var server = require('http').createServer(app);
+var orchestrator = require('./orchestrator')
 
 orchestrator.init(server)
 
-server.listen(port);
+// healthcheck endpoint
+app.get('/health', (req, res) => {
+  res.send('Healthy');
+})
 
-console.log(`Server listening on port ${port}`)
+server.listen(LISTENING_PORT, () => {
+  console.log(`Server listening on port ${LISTENING_PORT}`)
+});
 
 ON_DEATH( (signal, err) => {
     console.log('ON_DEATH signal detected')
