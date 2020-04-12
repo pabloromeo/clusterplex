@@ -24,5 +24,7 @@ COPY . .
 
 ENTRYPOINT []
 
+EXPOSE 3501
+
 CMD ["node", "worker.js"]
 
