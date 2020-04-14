@@ -1,6 +1,5 @@
 const { v4: uuid } = require('uuid');
 const STREAM_SPLITTING = process.env.STREAM_SPLITTING || 'OFF'
-const METRICS_PORT = process.env.METRICS_PORT || 9464
 
 // selection strategies:
 // RR : Round-Robin
@@ -11,7 +10,7 @@ const WORKER_SELECTION_STRATEGY_LOAD_CPU = 'LOAD_CPU'
 const WORKER_SELECTION_STRATEGY_LOAD_TASKS = 'LOAD_TASKS'
 const WORKER_SELECTION_STRATEGY = process.env.WORKER_SELECTION_STRATEGY || WORKER_SELECTION_STRATEGY_LOAD_CPU
 
-var metrics = require('./metrics').init(METRICS_PORT)
+const metrics = require('./metrics')
 
 class Worker {
     constructor(id, socketId, host) {
@@ -22,46 +21,26 @@ class Worker {
         this.stats = { cpu: 0, tasks: 0 }
         this.activeTaskCount = 0
         this.usageCounter = 0
-
-        this.boundLabels = { 'worker_id': this.id, 'worker_host': this.host }
-
-        this.usageCounterMetric = metrics.unboundWorkerUsageCounter.bind(this.boundLabels)
-        this.activeTasksMetric = metrics.unboundWorkerActiveTasks.bind(this.boundLabels)
-        this.statsCpuMetricMeasure = metrics.unboundWorkerStatsCpuMeasure.bind(this.boundLabels)
-        this.statsTasksMetricMeasure = metrics.unboundWorkerStatsTasksMeasure.bind(this.boundLabels)
-
-        metrics.workerLoadCPUObserver.setCallback(cb => cb.observe(() => { return this.stats.cpu }, this.boundLabels))
-        metrics.workerLoadTasksObserver.setCallback(cb => cb.observe(() => { return this.stats.tasks }, this.boundLabels))
     }
 
     onTaskAssigned() {
         this.activeTaskCount++
         this.usageCounter++
-        this.usageCounterMetric.add(1)
-        this.activeTasksMetric.add(1)
     }
 
     onTaskUnassigned() {
         this.activeTaskCount--
-        this.activeTasksMetric.add(-1)
     }
 
     onRegister() {
-        metrics.workersActiveCount.add(1)
     }
 
     onUnregister() {
-        metrics.workerLoadCPUObserver.setCallback(cb => cb.observers.delete(this.boundLabels))
-        metrics.workerLoadCPUObserver.unbind(this.boundLabels)
-        metrics.workerLoadTasksObserver.setCallback(cb => cb.observers.delete(this.boundLabels))
-        metrics.workerLoadTasksObserver.unbind(this.boundLabels)
-        metrics.workersActiveCount.add(-1)
     }
 
     updateStats(stats) {
         this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks)}
-        this.statsCpuMetricMeasure.record(this.stats.cpu)
-        this.statsTasksMetricMeasure.record(this.stats.tasks)
+        metrics.setWorkerLoadCPU(this.id, this.host, this.stats.cpu)
     }
 }
 
@@ -75,6 +54,7 @@ class WorkerSet {
         console.log(`Registering worker ${worker.name}`)
         this.workers.set(worker.id, worker)
         worker.onRegister()
+        metrics.setActiveWorkers(this.size())
     }
 
     unregister(socketId) {
@@ -86,6 +66,7 @@ class WorkerSet {
         } else {
             console.error(`No worker found for socket ${socketId}`)
         }
+        metrics.setActiveWorkers(this.size())
     }
 
     findById(id) {
@@ -276,13 +257,11 @@ class WorkQueue {
             this.onTaskComplete(task)
             this.tasks.delete(task.id)
             console.log(`Task ${task.id} complete`)
-            metrics.tasksCompleted.add(1)
         }
         if (task.job.status === 'done') {
             this.onJobComplete(task.job)
             this.jobs.delete(task.job)
             console.log(`Job ${task.job.id} complete`)
-            metrics.jobsCompleted.add(1)
         }
     }
 
@@ -314,6 +293,10 @@ class WorkQueue {
             }
         }
     }
+}
+
+module.exports.injectMetricsRoute = (app) => {
+    return metrics.injectMetricsRoute(app)
 }
 
 module.exports.init = (server) => {
