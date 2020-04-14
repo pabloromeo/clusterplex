@@ -1,6 +1,6 @@
 const client = require('prom-client');
 
-client.collectDefaultMetrics()
+//client.collectDefaultMetrics()
 
 const gaugeActiveWorkers = new client.Gauge({
     name: 'active_workers',
