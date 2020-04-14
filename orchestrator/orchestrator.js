@@ -10,15 +10,37 @@ const WORKER_SELECTION_STRATEGY_LOAD_CPU = 'LOAD_CPU'
 const WORKER_SELECTION_STRATEGY_LOAD_TASKS = 'LOAD_TASKS'
 const WORKER_SELECTION_STRATEGY = process.env.WORKER_SELECTION_STRATEGY || WORKER_SELECTION_STRATEGY_LOAD_CPU
 
+const metrics = require('./metrics')
+
 class Worker {
     constructor(id, socketId, host) {
         this.id = id
         this.socketId = socketId
         this.host = host
         this.name = `${this.id}|${this.host}`
-        this.stats = { cpu: 9999.0, tasks: 0 }
+        this.stats = { cpu: 0, tasks: 0 }
         this.activeTaskCount = 0
         this.usageCounter = 0
+    }
+
+    onTaskAssigned() {
+        this.activeTaskCount++
+        this.usageCounter++
+    }
+
+    onTaskUnassigned() {
+        this.activeTaskCount--
+    }
+
+    onRegister() {
+    }
+
+    onUnregister() {
+    }
+
+    updateStats(stats) {
+        this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks)}
+        metrics.setWorkerLoadCPU(this.id, this.host, this.stats.cpu)
     }
 }
 
@@ -31,16 +53,20 @@ class WorkerSet {
     register(worker) {
         console.log(`Registering worker ${worker.name}`)
         this.workers.set(worker.id, worker)
+        worker.onRegister()
+        metrics.setActiveWorkers(this.size())
     }
 
     unregister(socketId) {
         let worker = this.findBySocketId(socketId)
         if (worker) {
             console.log(`Unregistering worker ${worker.name}`)
+            worker.onUnregister()
             this.workers.delete(worker.id)
         } else {
             console.error(`No worker found for socket ${socketId}`)
         }
+        metrics.setActiveWorkers(this.size())
     }
 
     findById(id) {
@@ -65,7 +91,7 @@ class WorkerSet {
     updateStats(socketId, stats) {
         var worker = this.findBySocketId(socketId)
         if (worker) {
-            worker.stats = stats
+            worker.updateStats(stats)
         }
         else {
             console.warn(`Received stats from unregistered worker on socket ${socketId}`)
@@ -169,12 +195,11 @@ class Task {
     assignTo(worker) {
         this.workerId = worker.id
         this.status = 'assigned'
-        worker.activeTaskCount++
-        worker.usageCounter++
+        worker.onTaskAssigned();
     }
 
     unassignFrom(worker) {
-        worker.activeTaskCount--
+        worker.onTaskUnassigned();
     }
 
     update(status, result, error) {
@@ -270,6 +295,10 @@ class WorkQueue {
     }
 }
 
+module.exports.injectMetricsRoute = (app) => {
+    return metrics.injectMetricsRoute(app)
+}
+
 module.exports.init = (server) => {
     console.log('Initializing orchestrator')
 
@@ -287,7 +316,7 @@ module.exports.init = (server) => {
     function runTask(task) {
         let worker = workers.getNextAvailableWorker()
         if (worker) {
-            console.log(`Forwarding transcoding request to ${worker.name}`)
+            console.log(`Forwarding work request to ${worker.name}`)
             task.assignTo(worker)
             io.sockets.sockets[worker.socketId].emit('worker.task.request', {
                 taskId: task.id,

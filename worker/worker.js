@@ -1,5 +1,5 @@
 const LISTENING_PORT = process.env.LISTENING_PORT || 3501
-const STAT_CPU_INTERVAL = process.env.STAT_CPU_INTERVAL || 10000
+const STAT_CPU_INTERVAL = process.env.STAT_CPU_INTERVAL || 2000
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
