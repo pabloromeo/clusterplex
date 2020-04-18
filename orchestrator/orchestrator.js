@@ -41,6 +41,7 @@ class Worker {
     updateStats(stats) {
         this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks)}
         metrics.setWorkerLoadCPU(this.id, this.host, this.stats.cpu)
+        metrics.setWorkerLoadTasks(this.id, this.host, this.stats.tasks)
     }
 }
 
@@ -115,6 +116,7 @@ class WorkerSet {
                 return this.taskLoadBasedSelector
         }
     }
+
     roundRobinSelector() {
         let currentWorkers = Array.from(this.workers.values())
         this.roundRobinIndex = (this.roundRobinIndex + 1) % currentWorkers.length
@@ -146,6 +148,33 @@ class JobPoster {
         this.socketId = socketId
         this.host = host
         this.name = `${this.id}|${host}`
+    }
+}
+
+class JobPosterSet {
+    constructor() {
+        this.items = new Map()
+    }
+
+    get(jobPosterId) {
+        return this.items.get(jobPosterId)
+    }
+    add(jobPoster) {
+        this.items.set(jobPoster.id, jobPoster)
+        metrics.setActiveJobPosters(this.items.size)
+    }
+
+    remove(jobPoster) {
+        this.items.delete(jobPoster.id)
+        metrics.setActiveJobPosters(this.items.size)
+    }
+
+    findBySocketId(id) {
+        for(const jobPoster of this.items.values()) {
+            if (jobPoster.socketId === id)
+                return jobPoster;
+        }
+        return null;
     }
 }
 
@@ -240,6 +269,7 @@ class WorkQueue {
             console.log(`Queueing task ${task.id}`)
             this.tasks.set(task.id, task)            
         }
+        metrics.jobPosted()
     }
 
     update(taskUpdate) {
@@ -259,6 +289,13 @@ class WorkQueue {
             console.log(`Task ${task.id} complete`)
         }
         if (task.job.status === 'done') {
+            if (task.job.result) {
+                metrics.jobSucceeded()
+            } else {
+                metrics.jobFailed()
+            }
+            metrics.jobCompleted()
+    
             this.onJobComplete(task.job)
             this.jobs.delete(task.job)
             console.log(`Job ${task.job.id} complete`)
@@ -279,6 +316,7 @@ class WorkQueue {
             job.status = 'killed'
             this.jobs.delete(job)
             this.onJobKilled(job)
+            metrics.jobKilled()
         }
     }
 
@@ -307,7 +345,7 @@ module.exports.init = (server) => {
     });
 
     let workers = new WorkerSet()
-    let jobPosters = new Map()
+    let jobPosters = new JobPosterSet()
     let jobs = new Set()
     let workQueue = new WorkQueue(runTask, taskComplete, taskKilled, jobComplete, jobKilled)
     let disconnectionHandlers = new Map()
@@ -357,6 +395,7 @@ module.exports.init = (server) => {
             posterSocket.emit('jobposter.job.response', { result : job.result })
             console.log('JobPoster notified')
         }
+
         console.log(`Removing job ${job.id}`)
         jobs.delete(job)
     }
@@ -366,24 +405,16 @@ module.exports.init = (server) => {
         console.log(`Job ${job.id} killed`)
     }
 
-    function findJobPosterBySocketId(id) {
-        for(const jobPoster of jobPosters.values()) {
-            if (jobPoster.socketId === id)
-                return jobPoster;
-        }
-        return null;
-    }
-
     function workerDisconnectionHandler(socket) {
         console.log(`Unregistering worker at socket ${socket.id}`)
         workers.unregister(socket.id)
     }
 
     function jobPosterDisconnectionHandler(socket) {
-        let jobPoster = findJobPosterBySocketId(socket.id)
+        let jobPoster = jobPosters.findBySocketId(socket.id)
         if (jobPoster) {
             console.log(`Removing job-poster ${jobPoster.name} from pool`)
-            jobPosters.delete(jobPoster.id)
+            jobPosters.remove(jobPoster)
             
             workQueue.kill(v => { return v.jobPosterId === jobPoster.id })
         }
@@ -483,14 +514,14 @@ module.exports.init = (server) => {
 
         socket.on('jobposter.announce', data => {
             const jobposter = new JobPoster(data.jobPosterId, socket.id, data.host);
-            jobPosters.set(jobposter.id, jobposter)
+            jobPosters.add(jobposter)
             disconnectionHandlers.set(socket.id, jobPosterDisconnectionHandler)
             console.log(`Registered new job poster: ${jobposter.name}`)
             socket.emit('jobposter.produce')    // tell jobPoster he can send work
         })
 
         socket.on('jobposter.job.request', request => {
-            let jobPoster = findJobPosterBySocketId(socket.id)
+            let jobPoster = jobPosters.findBySocketId(socket.id)
             
             let job = new Job(jobPoster.id, request)
             taskBuilder(job)    // creates N tasks for the job request
