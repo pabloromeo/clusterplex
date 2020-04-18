@@ -1,6 +1,16 @@
-const uuid = require('uuid/v4');
-
+const { v4: uuid } = require('uuid');
 const STREAM_SPLITTING = process.env.STREAM_SPLITTING || 'OFF'
+
+// selection strategies:
+// RR : Round-Robin
+// LOAD: Lowest CPU load
+// TASK: Lowest task count
+const WORKER_SELECTION_STRATEGY_RR = 'RR'
+const WORKER_SELECTION_STRATEGY_LOAD_CPU = 'LOAD_CPU'
+const WORKER_SELECTION_STRATEGY_LOAD_TASKS = 'LOAD_TASKS'
+const WORKER_SELECTION_STRATEGY = process.env.WORKER_SELECTION_STRATEGY || WORKER_SELECTION_STRATEGY_LOAD_CPU
+
+const metrics = require('./metrics')
 
 class Worker {
     constructor(id, socketId, host) {
@@ -8,31 +18,56 @@ class Worker {
         this.socketId = socketId
         this.host = host
         this.name = `${this.id}|${this.host}`
-        this.stats = { cpu: 9999.0, tasks: 0 }
+        this.stats = { cpu: 0, tasks: 0 }
         this.activeTaskCount = 0
         this.usageCounter = 0
+    }
+
+    onTaskAssigned() {
+        this.activeTaskCount++
+        this.usageCounter++
+    }
+
+    onTaskUnassigned() {
+        this.activeTaskCount--
+    }
+
+    onRegister() {
+    }
+
+    onUnregister() {
+    }
+
+    updateStats(stats) {
+        this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks)}
+        metrics.setWorkerLoadCPU(this.id, this.host, this.stats.cpu)
+        metrics.setWorkerLoadTasks(this.id, this.host, this.stats.tasks)
     }
 }
 
 class WorkerSet {
     constructor() {
         this.workers = new Map()
-        this.roundRobinIndex = -1
+        this.workerSelectionStrategy = this.getWorkerSelectionStrategy()
     }
 
     register(worker) {
         console.log(`Registering worker ${worker.name}`)
         this.workers.set(worker.id, worker)
+        worker.onRegister()
+        metrics.setActiveWorkers(this.size())
     }
 
     unregister(socketId) {
         let worker = this.findBySocketId(socketId)
         if (worker) {
             console.log(`Unregistering worker ${worker.name}`)
+            worker.onUnregister()
             this.workers.delete(worker.id)
         } else {
             console.error(`No worker found for socket ${socketId}`)
         }
+        metrics.setActiveWorkers(this.size())
     }
 
     findById(id) {
@@ -48,16 +83,62 @@ class WorkerSet {
     }
 
     getNextAvailableWorker() {
-        if (this.workers.size == 0)
+        if (this.workers.size == 0) {
             return null
-            
+        }
+        return this.workerSelectionStrategy(); 
+    }
+
+    updateStats(socketId, stats) {
+        var worker = this.findBySocketId(socketId)
+        if (worker) {
+            worker.updateStats(stats)
+        }
+        else {
+            console.warn(`Received stats from unregistered worker on socket ${socketId}`)
+        }
+    }
+
+    size() {
+        return this.workers.size
+    }
+
+    getWorkerSelectionStrategy() {
+        console.debug(`Using Worker Selection Strategy: ${WORKER_SELECTION_STRATEGY}`)
+
+        switch (WORKER_SELECTION_STRATEGY) {
+            case WORKER_SELECTION_STRATEGY_RR:
+                this.roundRobinIndex = -1
+                return this.roundRobinSelector
+            case WORKER_SELECTION_STRATEGY_LOAD_CPU:
+                return this.loadBasedSelector
+            case WORKER_SELECTION_STRATEGY_LOAD_TASKS:
+                return this.taskLoadBasedSelector
+        }
+    }
+
+    roundRobinSelector() {
         let currentWorkers = Array.from(this.workers.values())
         this.roundRobinIndex = (this.roundRobinIndex + 1) % currentWorkers.length
         return currentWorkers[this.roundRobinIndex]
     }
 
-    size() {
-        return this.workers.size
+    loadBasedSelector() {
+        let currentWorkers = Array.from(this.workers.values())
+        if (currentWorkers.length > 0) {
+            return currentWorkers.reduce((a,b) => a.stats.cpu < b.stats.cpu ? a : b)
+        } else {
+            return null
+        }
+    }
+
+    taskLoadBasedSelector() {
+        let currentWorkers = Array.from(this.workers.values())
+        if (currentWorkers.length > 0) {
+            return currentWorkers.reduce((a,b) => a.stats.tasks < b.stats.tasks ? a : b)
+        } else {
+            return null
+        }
     }
 }
 
@@ -67,6 +148,33 @@ class JobPoster {
         this.socketId = socketId
         this.host = host
         this.name = `${this.id}|${host}`
+    }
+}
+
+class JobPosterSet {
+    constructor() {
+        this.items = new Map()
+    }
+
+    get(jobPosterId) {
+        return this.items.get(jobPosterId)
+    }
+    add(jobPoster) {
+        this.items.set(jobPoster.id, jobPoster)
+        metrics.setActiveJobPosters(this.items.size)
+    }
+
+    remove(jobPoster) {
+        this.items.delete(jobPoster.id)
+        metrics.setActiveJobPosters(this.items.size)
+    }
+
+    findBySocketId(id) {
+        for(const jobPoster of this.items.values()) {
+            if (jobPoster.socketId === id)
+                return jobPoster;
+        }
+        return null;
     }
 }
 
@@ -116,12 +224,11 @@ class Task {
     assignTo(worker) {
         this.workerId = worker.id
         this.status = 'assigned'
-        worker.activeTaskCount++
-        worker.usageCounter++
+        worker.onTaskAssigned();
     }
 
     unassignFrom(worker) {
-        worker.activeTaskCount--
+        worker.onTaskUnassigned();
     }
 
     update(status, result, error) {
@@ -162,6 +269,7 @@ class WorkQueue {
             console.log(`Queueing task ${task.id}`)
             this.tasks.set(task.id, task)            
         }
+        metrics.jobPosted()
     }
 
     update(taskUpdate) {
@@ -181,6 +289,13 @@ class WorkQueue {
             console.log(`Task ${task.id} complete`)
         }
         if (task.job.status === 'done') {
+            if (task.job.result) {
+                metrics.jobSucceeded()
+            } else {
+                metrics.jobFailed()
+            }
+            metrics.jobCompleted()
+    
             this.onJobComplete(task.job)
             this.jobs.delete(task.job)
             console.log(`Job ${task.job.id} complete`)
@@ -201,6 +316,7 @@ class WorkQueue {
             job.status = 'killed'
             this.jobs.delete(job)
             this.onJobKilled(job)
+            metrics.jobKilled()
         }
     }
 
@@ -217,16 +333,19 @@ class WorkQueue {
     }
 }
 
+module.exports.injectMetricsRoute = (app) => {
+    return metrics.injectMetricsRoute(app)
+}
+
 module.exports.init = (server) => {
     console.log('Initializing orchestrator')
 
     const io = require('socket.io')(server, {
-        path: '/',
         serveClient: false
     });
 
     let workers = new WorkerSet()
-    let jobPosters = new Map()
+    let jobPosters = new JobPosterSet()
     let jobs = new Set()
     let workQueue = new WorkQueue(runTask, taskComplete, taskKilled, jobComplete, jobKilled)
     let disconnectionHandlers = new Map()
@@ -235,7 +354,7 @@ module.exports.init = (server) => {
     function runTask(task) {
         let worker = workers.getNextAvailableWorker()
         if (worker) {
-            console.log(`Forwarding transcoding request to ${worker.name}`)
+            console.log(`Forwarding work request to ${worker.name}`)
             task.assignTo(worker)
             io.sockets.sockets[worker.socketId].emit('worker.task.request', {
                 taskId: task.id,
@@ -276,6 +395,7 @@ module.exports.init = (server) => {
             posterSocket.emit('jobposter.job.response', { result : job.result })
             console.log('JobPoster notified')
         }
+
         console.log(`Removing job ${job.id}`)
         jobs.delete(job)
     }
@@ -285,24 +405,16 @@ module.exports.init = (server) => {
         console.log(`Job ${job.id} killed`)
     }
 
-    function findJobPosterBySocketId(id) {
-        for(const jobPoster of jobPosters.values()) {
-            if (jobPoster.socketId === id)
-                return jobPoster;
-        }
-        return null;
-    }
-
     function workerDisconnectionHandler(socket) {
         console.log(`Unregistering worker at socket ${socket.id}`)
         workers.unregister(socket.id)
     }
 
     function jobPosterDisconnectionHandler(socket) {
-        let jobPoster = findJobPosterBySocketId(socket.id)
+        let jobPoster = jobPosters.findBySocketId(socket.id)
         if (jobPoster) {
             console.log(`Removing job-poster ${jobPoster.name} from pool`)
-            jobPosters.delete(jobPoster.id)
+            jobPosters.remove(jobPoster)
             
             workQueue.kill(v => { return v.jobPosterId === jobPoster.id })
         }
@@ -389,6 +501,10 @@ module.exports.init = (server) => {
     io.on('connection', socket => {
         console.log(`Client connected: ${socket.id}`)
 
+        socket.on('worker.stats', stats => {
+            workers.updateStats(socket.id, stats)
+        })
+
         socket.on('worker.announce', data => {
             const worker = new Worker(data.workerId, socket.id, data.host);
             workers.register(worker)
@@ -398,14 +514,14 @@ module.exports.init = (server) => {
 
         socket.on('jobposter.announce', data => {
             const jobposter = new JobPoster(data.jobPosterId, socket.id, data.host);
-            jobPosters.set(jobposter.id, jobposter)
+            jobPosters.add(jobposter)
             disconnectionHandlers.set(socket.id, jobPosterDisconnectionHandler)
             console.log(`Registered new job poster: ${jobposter.name}`)
             socket.emit('jobposter.produce')    // tell jobPoster he can send work
         })
 
         socket.on('jobposter.job.request', request => {
-            let jobPoster = findJobPosterBySocketId(socket.id)
+            let jobPoster = jobPosters.findBySocketId(socket.id)
             
             let job = new Job(jobPoster.id, request)
             taskBuilder(job)    // creates N tasks for the job request
@@ -426,7 +542,6 @@ module.exports.init = (server) => {
                 disconnectionHandlers.delete(socket.id)
             }
         })
-
     })
     console.log('Ready')
 }

@@ -1,15 +1,27 @@
-const STAT_CPU_INTERVAL = process.env.STAT_CPU_INTERVAL || 10000
+const LISTENING_PORT = process.env.LISTENING_PORT || 3501
+const STAT_CPU_INTERVAL = process.env.STAT_CPU_INTERVAL || 2000
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
 
+var app = require('express')();
+var server = require('http').createServer(app);
 var socket = require('socket.io-client')(ORCHESTRATOR_URL);
 var cpuStat = require('cpu-stat');
 const { spawn } = require('child_process');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 
 var ON_DEATH = require('death')({debug: true})
 
+// healthcheck endpoint
+app.get('/health', (req, res) => {
+  res.send('Healthy');
+})
+
+server.listen(LISTENING_PORT, () => {
+    console.log(`Worker listening on port ${LISTENING_PORT}`)
+});
+  
 // initialize CPU stats to a high number until it is overwritten by first sample
 let cpuUsage = 9999.0;
 
@@ -18,12 +30,17 @@ setInterval( () => {
     cpuStat.usagePercent({ sampleMs: STAT_CPU_INTERVAL }, (err, percent, seconds) => {
         if (!err) {
             cpuUsage = percent.toFixed(2)
+            if (socket.connected) {
+                socket.emit('worker.stats', { cpu: cpuUsage, tasks : taskMap.size })
+            }
         }
     });
 }, STAT_CPU_INTERVAL)
 
 let workerId = uuid()
 let taskMap = new Map()
+
+console.debug(`Initializing Worker ${workerId}|${process.env.HOSTNAME}`)
 
 socket.on('connect', () => {
     console.log(`Worker connected on socket ${socket.id}`)
@@ -32,11 +49,6 @@ socket.on('connect', () => {
         workerId: workerId,
         host: process.env.HOSTNAME
     })
-})
-
-socket.on('worker.stats', cb => {
-    console.log('Answering with stats to Orchestrator')
-    cb({ cpu : cpuUsage, tasks: taskMap.size })
 })
 
 socket.on('worker.task.request', taskRequest => {

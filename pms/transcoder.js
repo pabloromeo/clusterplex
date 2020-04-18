@@ -1,6 +1,6 @@
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
+
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
-const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
 const TRANSCODER_LOCAL_NAME = process.env.TRANSCODER_LOCAL_NAME || 'originalTranscoder'
 const PMS_IP = process.env.PMS_IP || '127.0.0.1'
 const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
@@ -11,16 +11,13 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
 
 const { spawn } = require('child_process');
-const uuid = require('uuid/v4');
 var ON_DEATH = require('death')({debug: true})
 
-let uniqueId = uuid()
+var jobPoster = require('./jobPoster')
 
 if (TRANSCODE_OPERATING_MODE == 'local') {
     transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
 } else {
-    var socket = require('socket.io-client')(ORCHESTRATOR_URL);
-
     function setValueOf(arr, key, newValue) {
         let i = arr.indexOf(key)
         if (i > 0) {
@@ -28,57 +25,36 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
         }
     }
 
-    socket.on('connect', () => {
-        console.log('JobPoster connected, announcing')
-        socket.emit('jobposter.announce', 
-        {
-            jobPosterId: uniqueId,
-            host: process.env.HOSTNAME
-        })
+    let newArgs = process.argv.slice(2).map((v) => {
+        return v.replace('127.0.0.1:', `${PMS_IP}:`)
     })
 
-    let workSent = false
-    socket.on('jobposter.produce', () => {
-        console.log('Orchestrator requesting pending work')
+    if (TRANSCODER_VERBOSE == '1') {
+        console.log('Setting VERBOSE to ON')
+        setValueOf(newArgs, '-loglevel', 'verbose')
+        setValueOf(newArgs, '-loglevel_plex', 'verbose')    
+    }
 
-        if (workSent) {
-            console.log('Work already sent, nothing to do')
-            return
+    let environmentVariables = process.env
+    let workDir = process.cwd()
+
+    console.log(`Sending request to orchestrator on: ${ORCHESTRATOR_URL}`)
+    if (TRANSCODER_VERBOSE == '1') {
+        console.log(`cwd => ${JSON.stringify(workDir)}`)
+        console.log(`args => ${JSON.stringify(newArgs)}`)
+        console.log(`env => ${JSON.stringify(environmentVariables)}`)
+    }
+    
+    jobPoster.postJob(ORCHESTRATOR_URL, 
+    {
+        type: 'transcode',
+        payload: {
+            cwd: workDir,
+            args: newArgs,
+            env: environmentVariables
         }
-
-        let newArgs = process.argv.slice(2).map((v) => {
-            return v.replace('127.0.0.1:', `${PMS_IP}:`)
-        })
-
-        if (TRANSCODER_VERBOSE == '1') {
-            console.log('Setting VERBOSE to ON')
-            setValueOf(newArgs, '-loglevel', 'verbose')
-            setValueOf(newArgs, '-loglevel_plex', 'verbose')    
-        }
-
-        let environmentVariables = process.env
-        let workDir = process.cwd()
-
-        console.log(`Sending request to orchestrator on: ${ORCHESTRATOR_URL}`)
-        if (TRANSCODER_VERBOSE == '1') {
-            console.log(`cwd => ${JSON.stringify(workDir)}`)
-            console.log(`args => ${JSON.stringify(newArgs)}`)
-            console.log(`env => ${JSON.stringify(environmentVariables)}`)
-        }
-        socket.emit('jobposter.job.request', 
-        {
-            type: 'transcode',
-            payload: {
-                cwd: workDir,
-                args: newArgs,
-                env: environmentVariables
-            }
-        })
-
-        workSent = true
-    })
-
-    socket.on('jobposter.job.response', response => {
+    },
+    (response) => {
         if (!response.result) {
             console.error('Distributed transcoder failed, calling local')
             if (TRANSCODE_OPERATING_MODE == 'both') {
@@ -92,7 +68,8 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
             console.log("Remote Transcoding was successful")
             process.exit(0)
         }
-    })
+    }
+    )
 }
 
 function transcodeLocally(cwd, args, env) {
