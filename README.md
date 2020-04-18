@@ -122,3 +122,81 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
 ```
+
+## Parameters
+
+### Plex
+
+The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/plex/) Image, see [here](https://hub.docker.com/r/linuxserver/plex/) for information on all its parameters.
+
+| Parameter | Function |
+| :----: | --- |
+| `ORCHESTRATOR_URL` | The url where the orchestrator service can be reached (ex: http://plex-orchestrator:3500) |
+| `PMS_IP` | IP pointing at the Plex instance (can be the cluster IP) |
+| `TRANSCODE_OPERATING_MODE` | "local" => only local transcoding (no workers), "remote" => only remote workers transcoding, "both" (default) => Remote first, local if it fails |
+| `TRANSCODER_VERBOSE` | "0" (default) => info level, "1" => debug logging |
+
+### Orchestrator
+
+| Parameter | Function |
+| :----: | --- |
+| `TZ` | Timezone |
+| `STREAM_SPLITTING` | Experimental feature, only "OFF" is allowed |
+| `LISTENING_PORT` | Port where orchestrator should run |
+| `WORKER_SELECTION_STRATEGY` | How the worker is chosen: "LOAD_CPU" (default) => lowest CPU usage, "LOAD_TASKS" => least amount of current tasks, "RR" => round-robin |
+
+#### Orchestrator metrics
+
+The Orchestrator exposes usage metrics at */metrics*, in Prometheus format.
+
+```
+# HELP jobs_posted Jobs Posted
+# TYPE jobs_posted counter
+jobs_posted 0
+
+# HELP jobs_completed Jobs Completed
+# TYPE jobs_completed counter
+jobs_completed 0
+
+# HELP jobs_succeeded Jobs Succeeded
+# TYPE jobs_succeeded counter
+jobs_succeeded 0
+
+# HELP jobs_failed Jobs Failed
+# TYPE jobs_failed counter
+jobs_failed 0
+
+# HELP jobs_killed Jobs Killed
+# TYPE jobs_killed counter
+jobs_killed 0
+
+# HELP job_posters_active Active Job Posters
+# TYPE job_posters_active gauge
+job_posters_active 0
+
+# HELP workers_active Active Workers
+# TYPE workers_active gauge
+workers_active 2
+
+# HELP worker_load_cpu Worker Load - CPU usage
+# TYPE worker_load_cpu gauge
+worker_load_cpu{worker_id="869902cf-5f95-49ec-8d4e-c49ff9bee914",worker_name="NODE1"} 28.13
+worker_load_cpu{worker_id="61e06076-4b9e-4d83-bcaa-1385f2d8f414",worker_name="NODE2"} 11.97
+
+# HELP worker_load_tasks Worker Load - Tasks Count
+# TYPE worker_load_tasks gauge
+worker_load_tasks{worker_id="869902cf-5f95-49ec-8d4e-c49ff9bee914",worker_name="NODE1"} 1
+worker_load_tasks{worker_id="61e06076-4b9e-4d83-bcaa-1385f2d8f414",worker_name="NODE2"} 0
+```
+
+### Workers
+
+The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/plex/) Image, see [here](https://hub.docker.com/r/linuxserver/plex/) for information on all its parameters.
+
+| Parameter | Function |
+| :----: | --- |
+| `LISTENING_PORT` | Port where workers expose the internal healthcheck |
+| `STAT_CPU_INTERVAL` | Frequency at which the worker sends stats to the orchestrator (in ms). Default 2000 |
+| `ORCHESTRATOR_URL` | The url where the orchestrator service can be reached (ex: http://plex-orchestrator:3500) |
+| `TRANSCODER_PATH` | Default = '/usr/lib/plexmediaserver/' |
+| `TRANSCODER_NAME` | Default = 'Plex Transcoder' |
