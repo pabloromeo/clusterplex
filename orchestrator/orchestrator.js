@@ -317,6 +317,7 @@ class WorkQueue {
             this.jobs.delete(job)
             this.onJobKilled(job)
             metrics.jobKilled()
+            metrics.jobCompleted()
         }
     }
 
