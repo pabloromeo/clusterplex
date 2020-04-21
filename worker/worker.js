@@ -8,7 +8,7 @@ var app = require('express')();
 var server = require('http').createServer(app);
 var socket = require('socket.io-client')(ORCHESTRATOR_URL);
 var cpuStat = require('cpu-stat');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const { v4: uuid } = require('uuid');
 
 var ON_DEATH = require('death')({debug: true})
@@ -59,10 +59,16 @@ socket.on('worker.task.request', taskRequest => {
         status: 'received'
     })
 
-    let child = spawn(TRANSCODER_PATH + TRANSCODER_NAME, taskRequest.payload.args, {
-        cwd: taskRequest.payload.cwd,
-        env: taskRequest.payload.env
-    });
+    var child
+    if (taskRequest.payload.args[0] === 'testpayload') {
+        console.log('Starting test of waiting for 5 seconds')
+        child = exec('sleep 5');
+    } else {
+        child = spawn(TRANSCODER_PATH + TRANSCODER_NAME, taskRequest.payload.args, {
+            cwd: taskRequest.payload.cwd,
+            env: taskRequest.payload.env
+        });
+    }
 
     taskMap.set(taskRequest.taskId, child)
 

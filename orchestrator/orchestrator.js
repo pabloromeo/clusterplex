@@ -321,6 +321,13 @@ class WorkQueue {
         }
     }
 
+    killWorkerTasks(workerId) {
+        console.debug(`Killing pending tasks for worker: ${workerId}`)
+        for (const task of Array.from(this.tasks.values()).filter(x => x.workerId === workerId)) {
+            this.update(new TaskUpdate(task.id, 'done', false, 'Worker disconnected'))
+        }
+    }
+
     step() {
         for (const task of this.tasks.values()) {
             //cleanup
@@ -408,6 +415,8 @@ module.exports.init = (server) => {
 
     function workerDisconnectionHandler(socket) {
         console.log(`Unregistering worker at socket ${socket.id}`)
+        let worker = workers.findBySocketId(socket.id)
+        workQueue.killWorkerTasks(worker.id)
         workers.unregister(socket.id)
     }
 
