@@ -6,7 +6,7 @@ ClusterPlex is basically an extended version of Plex, which supports distributed
 
 [Plex](https://plex.tv) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices.
 
-[![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)](https://plex.tv)
+![plex](images/plex-logo.png)
 
 ## How it works
 
@@ -23,6 +23,8 @@ Upgrading Plex when a new version comes out is basically just rebuilding the doc
 **Important:** Plex’s Application Data and transcoding folders should be ideally in shared storage over NFS or similar and the Media Libraries should all be mounted as volumes both in PMS and each worker node under the same paths. The Worker will invoke the transcoder using the original path arguments so the content should be available to every worker as well. 
 
 ## Example Docker Swarm Deployment
+
+![docker-swarm](images/docker-swarm.png)
 
 Docker swarm stack example:
 
@@ -188,6 +190,10 @@ worker_load_cpu{worker_id="61e06076-4b9e-4d83-bcaa-1385f2d8f414",worker_name="NO
 worker_load_tasks{worker_id="869902cf-5f95-49ec-8d4e-c49ff9bee914",worker_name="NODE1"} 1
 worker_load_tasks{worker_id="61e06076-4b9e-4d83-bcaa-1385f2d8f414",worker_name="NODE2"} 0
 ```
+
+Using these metrics you can create Dashboards in something like Grafana, such as:
+
+![grafana-metrics](images/grafana-metrics.png)
 
 ### Workers
 
