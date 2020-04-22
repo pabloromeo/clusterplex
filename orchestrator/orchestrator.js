@@ -40,8 +40,8 @@ class Worker {
 
     updateStats(stats) {
         this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks)}
-        metrics.setWorkerLoadCPU(this.id, this.host, this.stats.cpu)
-        metrics.setWorkerLoadTasks(this.id, this.host, this.stats.tasks)
+        metrics.setWorkerLoadCPU(this.host, this.stats.cpu)
+        metrics.setWorkerLoadTasks(this.host, this.stats.tasks)
     }
 }
 

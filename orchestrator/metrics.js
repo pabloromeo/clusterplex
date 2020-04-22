@@ -40,13 +40,13 @@ const gaugeWorkers = new client.Gauge({
 const workerLoadCPUStats = new client.Gauge({
     name : 'worker_load_cpu',
     help : 'Worker Load - CPU usage',
-    labelNames: ['worker_id', 'worker_name'],
+    labelNames: ['worker_name'],
 })
 
 const workerLoadTasksStats = new client.Gauge({
     name : 'worker_load_tasks',
     help : 'Worker Load - Tasks Count',
-    labelNames: ['worker_id', 'worker_name'],
+    labelNames: ['worker_name'],
 })
 
 module.exports = {
@@ -58,8 +58,8 @@ module.exports = {
 
     setActiveWorkers : (amount) => { gaugeWorkers.set(amount) },
     setActiveJobPosters : (amount) => { gaugeJobPosters.set(amount) },
-    setWorkerLoadCPU : (workerId, workerName, value) => { workerLoadCPUStats.labels(workerId, workerName).set(value) },
-    setWorkerLoadTasks : (workerId, workerName, value) => { workerLoadTasksStats.labels(workerId, workerName).set(value) },
+    setWorkerLoadCPU : (workerName, value) => { workerLoadCPUStats.labels(workerName).set(value) },
+    setWorkerLoadTasks : (workerName, value) => { workerLoadTasksStats.labels(workerName).set(value) },
     
     injectMetricsRoute : (app) => {  
         app.get('/metrics', (req, res) => {
