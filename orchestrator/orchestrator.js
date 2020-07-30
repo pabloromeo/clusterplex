@@ -370,6 +370,7 @@ module.exports.init = (server) => {
             })
         } else {
             console.log('No worker available at the moment')
+            workQueue.update(new TaskUpdate(task.id, 'done', false, 'No worker available'))
         }
     }
 
