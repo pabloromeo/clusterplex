@@ -3,12 +3,14 @@ const STREAM_SPLITTING = process.env.STREAM_SPLITTING || 'OFF'
 
 // selection strategies:
 // RR : Round-Robin
-// LOAD: Lowest CPU load
-// TASK: Lowest task count
+// LOAD_CPU: Lowest CPU load
+// LOAD_TASKS: Lowest task count
+// LOAD_RANK: OPS * (1 - CPU load)
 const WORKER_SELECTION_STRATEGY_RR = 'RR'
 const WORKER_SELECTION_STRATEGY_LOAD_CPU = 'LOAD_CPU'
 const WORKER_SELECTION_STRATEGY_LOAD_TASKS = 'LOAD_TASKS'
-const WORKER_SELECTION_STRATEGY = process.env.WORKER_SELECTION_STRATEGY || WORKER_SELECTION_STRATEGY_LOAD_CPU
+const WORKER_SELECTION_STRATEGY_LOAD_RANK = 'LOAD_RANK'
+const WORKER_SELECTION_STRATEGY = process.env.WORKER_SELECTION_STRATEGY || WORKER_SELECTION_STRATEGY_LOAD_RANK
 
 const metrics = require('./metrics')
 
@@ -18,7 +20,7 @@ class Worker {
         this.socketId = socketId
         this.host = host
         this.name = `${this.id}|${this.host}`
-        this.stats = { cpu: 0, tasks: 0 }
+        this.stats = { cpu: 0, tasks: 0, ops: 0, rank: 0 }
         this.activeTaskCount = 0
         this.usageCounter = 0
     }
@@ -39,9 +41,12 @@ class Worker {
     }
 
     updateStats(stats) {
-        this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks)}
+        this.stats = { cpu : parseFloat(stats.cpu), tasks: parseInt(stats.tasks), ops: parseInt(stats.ops)}
+        this.stats.rank = parseInt(this.stats.ops * (1 - (this.stats.cpu / 100.0)))
         metrics.setWorkerLoadCPU(this.host, this.stats.cpu)
         metrics.setWorkerLoadTasks(this.host, this.stats.tasks)
+        metrics.setWorkerLoadOps(this.host, this.stats.ops)
+        metrics.setWorkerLoadRank(this.host, this.stats.rank)
     }
 }
 
@@ -114,6 +119,8 @@ class WorkerSet {
                 return this.loadBasedSelector
             case WORKER_SELECTION_STRATEGY_LOAD_TASKS:
                 return this.taskLoadBasedSelector
+            case WORKER_SELECTION_STRATEGY_LOAD_RANK:
+                return this.rankedSelector
         }
     }
 
@@ -136,6 +143,15 @@ class WorkerSet {
         let currentWorkers = Array.from(this.workers.values())
         if (currentWorkers.length > 0) {
             return currentWorkers.reduce((a,b) => a.stats.tasks < b.stats.tasks ? a : b)
+        } else {
+            return null
+        }
+    }
+
+    rankedSelector() {
+        let currentWorkers = Array.from(this.workers.values())
+        if (currentWorkers.length > 0) {
+            return currentWorkers.reduce((a,b) => a.stats.rank > b.stats.rank ? a : b)
         } else {
             return null
         }
