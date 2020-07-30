@@ -13,6 +13,7 @@
     "death": "^1.1.0",
     "express": "^4.17.1",
     "socket.io-client": "^2.3.0",
-    "uuid": "^7.0.3"
+    "uuid": "^7.0.3",
+    "cpu-benchmark": "^1.0.1"
   }
 }
