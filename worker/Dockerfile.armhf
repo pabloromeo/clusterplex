@@ -9,6 +9,8 @@ RUN echo "**** install runtime packages ****" && \
     apt-get update && \
     echo "**** install Node.js ****" && \
     apt-get install -y nodejs && \
+    echo "**** install binutils ****" && \
+    apt-get install -y binutils && \
     echo "**** cleanup ****" && \
     rm -rf \
         /tmp/* \
@@ -22,9 +24,15 @@ RUN npm install
 
 COPY . .
 
+RUN chmod +x start.sh
+
 ENTRYPOINT []
 
 EXPOSE 3501
 
-CMD ["node", "worker.js"]
+ENV PLEX_MEDIA_SERVER_INFO_MODEL="armv7l"
+
+VOLUME /codecs
+
+CMD ["/bin/sh", "-c", "/app/start.sh"]
 
