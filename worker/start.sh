@@ -6,12 +6,16 @@ CLUSTERPLEX_PLEX_VERSION=$(strings "Plex Media Server" | grep -P '^([0-9]+)\.([0
 CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Media Server" | grep -P '^[0-9a-f]{7}-[0-9]{4}$')
 CLUSTERPLEX_PLEX_EAE_VERSION=$(printf "eae-`strings "Plex Media Server" | grep -P '^EasyAudioEncoder-eae-[0-9a-f]{7}-$' | cut -d- -f3`-42")
 
-echo "PLEX_ARCH => ${PLEX_ARCH}"
+echo "CLUSTERPLEX_PLEX_VERSION => '${CLUSTERPLEX_PLEX_VERSION}'"
+echo "CLUSTERPLEX_PLEX_CODECS_VERSION => '${CLUSTERPLEX_PLEX_CODECS_VERSION}'"
+echo "CLUSTERPLEX_PLEX_EAE_VERSION => '${CLUSTERPLEX_PLEX_EAE_VERSION}'"
+echo "PLEX_ARCH => '${PLEX_ARCH}'"
+
 CLUSTERPLEX_PLEX_CODEC_ARCH="${PLEX_ARCH}"
 
 case "${PLEX_ARCH}" in
   armhf)
-    CLUSTERPLEX_PLEX_CODEC_ARCH="armv7hf_neon"
+    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7hf_neon-standard"
     ;;
 esac
 
