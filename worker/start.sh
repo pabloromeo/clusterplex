@@ -1,8 +1,5 @@
 #!/bin/bash
 
-PLUGIN_BUILD=5f603a2-3204
-PLEX_ARCH=linux-x86_64-standard
-
 cd /usr/lib/plexmediaserver
 
 CLUSTERPLEX_PLEX_VERSION=$(strings "Plex Media Server" | grep -P '^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)-[0-9a-f]{9}')
