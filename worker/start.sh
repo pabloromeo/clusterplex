@@ -14,6 +14,9 @@ echo "PLEX_ARCH => '${PLEX_ARCH}'"
 CLUSTERPLEX_PLEX_CODEC_ARCH="${PLEX_ARCH}"
 
 case "${PLEX_ARCH}" in
+  amd64)
+    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-x86_64-standard"
+    ;;
   armhf)
     CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7hf_neon-standard"
     ;;
