@@ -57,6 +57,15 @@ socket.on('connect', () => {
     })
 })
 
+function processEnv(env) {
+    // overwrite environment settings coming from the original plex instance tied to architecture
+    newEnv = JSON.parse(JSON.stringify(env));
+    newEnv.PLEX_ARCH = process.env.PLEX_ARCH
+    newEnv.PLEX_MEDIA_SERVER_INFO_MODEL = process.env.PLEX_MEDIA_SERVER_INFO_MODEL
+    newEnv.FFMPEG_EXTERNAL_LIBS = process.env.FFMPEG_EXTERNAL_LIBS
+    return newEnv
+}
+
 socket.on('worker.task.request', taskRequest => {
     console.log('Received task request')
 
@@ -65,14 +74,18 @@ socket.on('worker.task.request', taskRequest => {
         status: 'received'
     })
 
+    var processedEnvironmentVariables = processEnv(taskRequest.payload.env)
+
     var child
     if (taskRequest.payload.args[0] === 'testpayload') {
+        console.log(`args => ${JSON.stringify(taskRequest.payload.args)}`)
+        console.log(`env => ${JSON.stringify(processedEnvironmentVariables)}`)
         console.log('Starting test of waiting for 5 seconds')
         child = exec('sleep 5');
     } else {
         child = spawn(TRANSCODER_PATH + TRANSCODER_NAME, taskRequest.payload.args, {
             cwd: taskRequest.payload.cwd,
-            env: taskRequest.payload.env
+            env: processedEnvironmentVariables
         });
     }
 
@@ -131,4 +144,3 @@ ON_DEATH( (signal, err) => {
     console.error(err)
     process.exit(signal)
 })
-
