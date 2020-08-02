@@ -88,7 +88,7 @@ services:
       TZ: Europe/London
       STREAM_SPLITTING: "OFF" # ON | OFF (default)
       LISTENING_PORT: 3500
-      WORKER_SELECTION_STRATEGY: "LOAD_CPU" # RR | LOAD_CPU | LOAD_TASKS
+      WORKER_SELECTION_STRATEGY: "LOAD_RANK" # RR | LOAD_CPU | LOAD_TASKS | LOAD_RANK (default)
     volumes:
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -116,7 +116,7 @@ services:
       retries: 5
       start_period: 30s
     volumes:
-      - /path/to/config:/config
+      - /path/to/codecs:/codecs # (optional, can be used to share codecs)
       - /path/to/backups:/backups
       - /path/to/tv:/data/tv
       - /path/to/movies:/data/movies
@@ -145,7 +145,7 @@ The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/pl
 | `TZ` | Timezone |
 | `STREAM_SPLITTING` | Experimental feature, only "OFF" is allowed |
 | `LISTENING_PORT` | Port where orchestrator should run |
-| `WORKER_SELECTION_STRATEGY` | How the worker is chosen: "LOAD_CPU" (default) => lowest CPU usage, "LOAD_TASKS" => least amount of current tasks, "RR" => round-robin |
+| `WORKER_SELECTION_STRATEGY` | How the worker is chosen: "LOAD_CPU" => lowest CPU usage, "LOAD_TASKS" => least amount of current tasks, "RR" => round-robin, "LOAD_RANK" (default) => CPU benchmark * free_cpu |
 
 #### Orchestrator metrics
 

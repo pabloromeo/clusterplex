@@ -1,8 +1,6 @@
-FROM linuxserver/plex:arm32v7-latest
+FROM linuxserver/plex:latest
 
 LABEL maintainer="pabloromeo"
-
-COPY qemu-arm-static /usr/bin/
 
 RUN echo "**** install runtime packages ****" && \
     curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
@@ -30,7 +28,7 @@ ENTRYPOINT []
 
 EXPOSE 3501
 
-ENV PLEX_MEDIA_SERVER_INFO_MODEL="armv7l"
+ENV PLEX_MEDIA_SERVER_INFO_MODEL="x86_64"
 
 VOLUME /codecs
 
