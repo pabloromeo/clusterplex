@@ -116,7 +116,7 @@ services:
       retries: 5
       start_period: 30s
     volumes:
-      - /path/to/config:/config
+      - /path/to/codecs:/codecs # (optional, can be used to share codecs)
       - /path/to/backups:/backups
       - /path/to/tv:/data/tv
       - /path/to/movies:/data/movies
