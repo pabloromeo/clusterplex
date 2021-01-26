@@ -28,6 +28,9 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
     let newArgs = process.argv.slice(2).map((v) => {
         return v.replace('127.0.0.1:', `${PMS_IP}:`)
     })
+// inserting -hwaccel auto into transcoder arguments here
+// uncomment following line to evaluate change
+//	setValueOf(newArgs, '-hwaccel', 'auto')
 
     if (TRANSCODER_VERBOSE == '1') {
         console.log('Setting VERBOSE to ON')
