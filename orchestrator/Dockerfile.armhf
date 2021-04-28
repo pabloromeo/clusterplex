@@ -1,8 +1,10 @@
-FROM arm32v7/node:11-slim
+FROM arm32v7/node:lts-slim
 
 LABEL maintainer="pabloromeo"
 
 COPY qemu-arm-static /usr/bin/
+
+RUN apt-get update && apt-get install curl -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
