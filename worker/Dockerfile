@@ -28,8 +28,6 @@ ENTRYPOINT []
 
 EXPOSE 3501
 
-ENV PLEX_MEDIA_SERVER_INFO_MODEL="x86_64"
-
 VOLUME /codecs
 
 CMD ["/bin/sh", "-c", "/app/start.sh"]
