@@ -27,5 +27,3 @@ RUN npm install
 COPY . .
 
 WORKDIR /
-
-ENV PLEX_MEDIA_SERVER_INFO_MODEL="x86_64"
