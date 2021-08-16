@@ -380,7 +380,7 @@ module.exports.init = (server) => {
         if (worker) {
             console.log(`Forwarding work request to ${worker.name}`)
             task.assignTo(worker)
-            io.sockets.sockets[worker.socketId].emit('worker.task.request', {
+            io.sockets.sockets.get(worker.socketId).emit('worker.task.request', {
                 taskId: task.id,
                 payload: task.payload
             })
@@ -403,7 +403,7 @@ module.exports.init = (server) => {
             let worker = workers.findById(task.workerId)
             if (worker) {
                 task.unassignFrom(worker)
-                let workerSocket = io.sockets.sockets[worker.socketId]
+                let workerSocket = io.sockets.sockets.get(worker.socketId)
                 if (workerSocket !== undefined && workerSocket.connected) {
                     workerSocket.emit('worker.task.kill', { taskId: task.id })
                     console.log(`Telling worker ${worker.name} to kill task ${task.id}`)
@@ -415,7 +415,7 @@ module.exports.init = (server) => {
     function jobComplete(job) {
         console.log(`Job ${job.id} complete, tasks: ${job.tasks.length}, result: ${job.result}`)
         let jobPoster = jobPosters.get(job.jobPosterId)
-        let posterSocket = io.sockets.sockets[jobPoster.socketId]
+        let posterSocket = io.sockets.sockets.get(jobPoster.socketId)
         if (posterSocket !== undefined && posterSocket.connected) {
             posterSocket.emit('jobposter.job.response', { result : job.result })
             console.log('JobPoster notified')

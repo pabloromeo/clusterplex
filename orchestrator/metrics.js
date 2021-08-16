@@ -76,9 +76,9 @@ module.exports = {
     setWorkerLoadRank : (workerName, value) => { workerLoadRankStats.labels(workerName).set(value) },
     
     injectMetricsRoute : (app) => {  
-        app.get('/metrics', (req, res) => {
+        app.get('/metrics', async (req, res) => {
             res.set('Content-Type', client.register.contentType);
-            res.end(client.register.metrics());
+            res.end(await client.register.metrics());
         })
     }
 }
