@@ -20,7 +20,7 @@ case "${PLEX_ARCH}" in
     INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL="x86_64"
     ;;
   armhf)
-    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7hf_neon-standard"
+    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7neon-standard"
     INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL="armv7l"
     ;;
 esac
