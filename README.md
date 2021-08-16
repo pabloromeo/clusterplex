@@ -12,7 +12,7 @@ ClusterPlex is basically an extended version of Plex, which supports distributed
 
 In order to be able to use multiple nodes for transcoding, it's made up of 3 parts:
 
-1. A custom Docker image based on the official linuxserver ARM image, in which Plex’s own transcoder is renamed and a shim is put in its place which calls a small Node.js app that communicates with the Orchestrator container over websockets.
+1. A custom Docker image based on the official linuxserver image, in which Plex’s own transcoder is renamed and a shim is put in its place which calls a small Node.js app that communicates with the Orchestrator container over websockets.
 
 2. An Orchestrator (Node.js application which receives all transcoding requests from PMS and forwards it to one of the active Workers available over websockets.
 
@@ -20,7 +20,7 @@ In order to be able to use multiple nodes for transcoding, it's made up of 3 par
 
 Upgrading Plex when a new version comes out is basically just rebuilding the docker images to get the latest update.
 
-**Important:** Plex’s Application Data and transcoding folders should be ideally in shared storage over NFS or similar and the Media Libraries should all be mounted as volumes both in PMS and each worker node under the same paths. The Worker will invoke the transcoder using the original path arguments so the content should be available to every worker as well. 
+**Important:** Plex’s Application Data and transcoding folders should be ideally in shared storage over NFS, SMB, Gluster or similar and the Media Libraries should all be mounted as volumes both in PMS and each worker node under the same paths. The Worker will invoke the transcoder using the original path arguments so the content should be available to every worker as well. 
 
 ## Example Docker Swarm Deployment
 
@@ -34,7 +34,7 @@ version: '3.4'
 
 services:
   plex:
-    image: pabloromeo/clusterplex:pms-armhf-latest
+    image: ghcr.io/pabloromeo/clusterplex_pms:latest
     deploy:
       mode: replicated
       replicas: 1
@@ -72,7 +72,7 @@ services:
       - 32414:32414/udp
 
   plex-orchestrator:
-    image: pabloromeo/clusterplex:orchestrator-armhf-latest
+    image: ghcr.io/pabloromeo/clusterplex_orchestrator:latest
     deploy:
       mode: replicated
       replicas: 1
@@ -95,7 +95,7 @@ services:
       - 3500:3500
 
   plex-worker:
-    image: pabloromeo/clusterplex:worker-armhf-latest
+    image: ghcr.io/pabloromeo/clusterplex_worker:latest
     hostname: "plex-worker-{{.Node.Hostname}}"
     deploy:
       mode: global
