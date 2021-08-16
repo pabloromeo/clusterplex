@@ -55,7 +55,6 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            pabloromeo/clusterplex_pms
             ghcr.io/pabloromeo/clusterplex_pms
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -66,7 +65,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-      - name: Build and push
+      - name: Build and push PMS
         uses: docker/build-push-action@v2
         with:
           context: ./pms
@@ -82,7 +81,6 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            pabloromeo/clusterplex_worker
             ghcr.io/pabloromeo/clusterplex_worker
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -93,7 +91,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-      - name: Build and push
+      - name: Build and push Worker
         uses: docker/build-push-action@v2
         with:
           context: ./worker
@@ -109,7 +107,6 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            pabloromeo/clusterplex_orchestrator
             ghcr.io/pabloromeo/clusterplex_orchestrator
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -120,7 +117,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-      - name: Build and push
+      - name: Build and push Orchestrator
         uses: docker/build-push-action@v2
         with:
           context: ./orchestrator
