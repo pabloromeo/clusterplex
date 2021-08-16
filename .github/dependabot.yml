@@ -8,16 +8,19 @@ updates:
   - package-ecosystem: "npm"
     # Files stored in `app` directory
     directory: "/orchestrator"
+    target-branch: "dev"
     schedule:
       interval: "daily"
   - package-ecosystem: "npm"
     # Files stored in `app` directory
     directory: "/pms"
+    target-branch: "dev"
     schedule:
       interval: "daily"
   - package-ecosystem: "npm"
     # Files stored in `app` directory
     directory: "/worker"
+    target-branch: "dev"
     schedule:
       interval: "daily"
 
@@ -25,5 +28,6 @@ updates:
     # Workflow files stored in the
     # default location of `.github/workflows`
     directory: "/"
+    target-branch: "dev"
     schedule:
       interval: "daily"
