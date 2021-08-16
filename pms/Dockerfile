@@ -3,7 +3,7 @@ FROM linuxserver/plex:latest
 LABEL maintainer="pabloromeo"
 
 RUN echo "**** install runtime packages ****" && \
-    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     apt-get update && \
     echo "**** install Node.js ****" && \
     apt-get install -y nodejs && \

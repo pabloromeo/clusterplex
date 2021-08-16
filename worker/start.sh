@@ -3,7 +3,7 @@
 cd /usr/lib/plexmediaserver
 
 CLUSTERPLEX_PLEX_VERSION=$(strings "Plex Media Server" | grep -P '^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)-[0-9a-f]{9}')
-CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Media Server" | grep -P '^[0-9a-f]{7}-[0-9]{4}$' -m1)
+CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Transcoder" | grep -Po '[0-9a-f]{7}-[0-9]{4}$')
 CLUSTERPLEX_PLEX_EAE_VERSION=$(printf "eae-`strings "Plex Media Server" | grep -P '^EasyAudioEncoder-eae-[0-9a-f]{7}-$' | cut -d- -f3`-42")
 
 echo "CLUSTERPLEX_PLEX_VERSION => '${CLUSTERPLEX_PLEX_VERSION}'"
@@ -20,7 +20,7 @@ case "${PLEX_ARCH}" in
     INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL="x86_64"
     ;;
   armhf)
-    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7hf_neon-standard"
+    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7neon-standard"
     INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL="armv7l"
     ;;
 esac
