@@ -1,4 +1,7 @@
 # ClusterPlex
+[![GitHub license](https://img.shields.io/github/license/pabloromeo/clusterplex.svg)](https://github.com/pabloromeo/clusterplex/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/pabloromeo/clusterplex.svg)](https://GitHub.com/pabloromeo/clusterplex/releases/)
+[![ci](https://github.com/pabloromeo/clusterplex/actions/workflows/main.yml/badge.svg)](https://github.com/pabloromeo/clusterplex/actions)
 
 ## What is it?
 
