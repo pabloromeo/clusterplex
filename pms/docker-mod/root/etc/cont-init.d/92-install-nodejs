@@ -1,18 +1,7 @@
 #!/usr/bin/with-contenv bash
 
-echo "**** Update sources ****"
+echo "**** install runtime packages ****"
+curl -sL https://deb.nodesource.com/setup_12.x | bash -
 apt-get update
-
-echo "**** Install dependency ****"
-apt-get install libatomic1
-
-echo "**** install NVM ****" && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-
-echo "**** initialize env ****"
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-echo "**** Installing nodejs & npm ****"
-nvm install node
+echo "**** install Node.js ****"
+apt-get install -y nodejs npm
