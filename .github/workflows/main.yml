@@ -82,16 +82,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      # https://github.com/docker/setup-qemu-action
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
-
-#      - name: Available platforms
-#        run: echo ${{ steps.buildx.outputs.platforms }}
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
@@ -102,7 +96,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       -
-        name: Docker meta for PMS
+        name: Docker meta for PMS-dockermod
         id: meta_pms_dockermod
         uses: docker/metadata-action@v3
         with:
@@ -123,7 +117,7 @@ jobs:
         with:
           context: ./pms
           file: ./pms/docker-mod/Dockerfile
-          platforms: linux/amd64,linux/arm/v7 # linux/arm64
+          platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_pms_dockermod.outputs.tags }}
           labels: ${{ steps.meta_pms_dockermod.outputs.labels }}
