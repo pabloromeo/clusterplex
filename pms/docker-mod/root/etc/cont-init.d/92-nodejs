@@ -1,4 +1,4 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** Installing nodejs & npm ****"
-apt-get install -y nodejs npm
+nvm install node

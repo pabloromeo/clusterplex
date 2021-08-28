@@ -1,4 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-echo "**** Updating sources ****"
-apt-get update

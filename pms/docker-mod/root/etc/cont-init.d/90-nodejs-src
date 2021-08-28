@@ -1,10 +1,4 @@
 #!/usr/bin/with-contenv bash
 
-echo "**** install runtime packages ****" && \
-    curl -sL https://deb.nodesource.com/setup_12.x | bash -
-
-#    echo '-----------------------------'
-#    echo '| Installing nodejs and npm |'
-#    echo '-----------------------------'
-#    apt-get update &&
-#    apt-get install -y nodejs npm
+echo "**** install NVM ****" && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
