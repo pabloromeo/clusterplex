@@ -16,14 +16,14 @@ RUN echo "**** install runtime packages ****" && \
 RUN echo "**** Rename Plex's transcoder ****" && \
     mv /usr/lib/plexmediaserver/'Plex Transcoder' /usr/lib/plexmediaserver/originalTranscoder
 
-COPY ["transcoder-shim.sh", "/usr/lib/plexmediaserver/Plex Transcoder"]
+COPY ["/app/transcoder-shim.sh", "/usr/lib/plexmediaserver/Plex Transcoder"]
 
 RUN chmod +x /usr/lib/plexmediaserver/'Plex Transcoder'
 
 WORKDIR /app
-COPY package*.json ./
+COPY /app/package*.json ./
 RUN npm install
 
-COPY . .
+COPY /app .
 
 WORKDIR /

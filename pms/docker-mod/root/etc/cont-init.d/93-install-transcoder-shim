@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** Rename Plex's transcoder ****"
+mv /usr/lib/plexmediaserver/'Plex Transcoder' /usr/lib/plexmediaserver/originalTranscoder
+
+echo "**** Move shim to destination ****"
+cp /app/transcoder-shim.sh /usr/lib/plexmediaserver/'Plex Transcoder'
+
+echo "**** Make the shim executable ****"
+chmod +x /usr/lib/plexmediaserver/'Plex Transcoder'
