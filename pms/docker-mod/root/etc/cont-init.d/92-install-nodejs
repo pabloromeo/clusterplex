@@ -1,5 +1,11 @@
 #!/usr/bin/with-contenv bash
 
+echo "**** Update sources ****"
+apt-get update
+
+echo "**** Install dependency ****"
+apt-get install libatomic1
+
 echo "**** install NVM ****" && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 
