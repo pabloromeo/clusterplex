@@ -1,23 +1,10 @@
 #!/usr/bin/with-contenv bash
 
-#echo "**** install runtime packages ****" && \
-#    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-#    apt-get update && \
-#    echo "**** install Node.js ****" && \
-#    apt-get install -y nodejs
+echo "**** install runtime packages ****" && \
+    curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 #    echo '-----------------------------'
 #    echo '| Installing nodejs and npm |'
 #    echo '-----------------------------'
 #    apt-get update &&
 #    apt-get install -y nodejs npm
-
-echo "**** installing nodejs dev environment ****"
-if ! dpkg -l | grep gnupg > /dev/null; then
-    apt-get update && apt-get install -y gnupg
-fi
-
-[[ ! -f "/etc/apt/sources.list.d/nodesource.list" ]] && \
-    curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_12.x bionic main' \
-        > /etc/apt/sources.list.d/nodesource.list
