@@ -1,4 +1,4 @@
-FROM scratch as buildstage
+FROM alpine as buildstage
 
 LABEL maintainer="pabloromeo"
 
