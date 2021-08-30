@@ -15,20 +15,21 @@ RUN echo "**** install runtime packages ****" && \
         /var/lib/apt/lists/* \
         /var/tmp/*
 
+RUN echo "**** Rename Plex's executable ****" && \
+    mv /usr/lib/plexmediaserver/'Plex Media Server' /usr/lib/plexmediaserver/pms_original
+
+COPY ["/app/start.sh", "/usr/lib/plexmediaserver/Plex Media Server"]
+
+RUN chmod +x /usr/lib/plexmediaserver/'Plex Media Server'
+
 WORKDIR /app
 
-COPY package*.json ./
+COPY /app/package*.json ./
 RUN npm install
 
-COPY . .
-
-RUN chmod +x start.sh
-
-ENTRYPOINT []
+COPY /app .
 
 EXPOSE 3501
 
 VOLUME /codecs
-
-CMD ["/bin/sh", "-c", "/app/start.sh"]
 
