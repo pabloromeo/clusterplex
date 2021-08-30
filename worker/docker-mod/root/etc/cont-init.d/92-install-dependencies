@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bash
+
+if which node > /dev/null
+then
+    echo "**** node is installed, skipping... ****"
+else
+    echo "**** install runtime packages ****"
+    curl -sL https://deb.nodesource.com/setup_12.x | bash -
+    apt-get update
+    echo "**** install Node.js & binutils ****"
+    apt-get install -y nodejs binutils
+fi
+

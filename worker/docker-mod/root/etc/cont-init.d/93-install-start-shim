@@ -1,0 +1,14 @@
+#!/usr/bin/with-contenv bash
+
+if file /usr/lib/plexmediaserver/'Plex Media Server' | grep -iq ASCII ; then
+    echo "**** Root executable is already clusterplex-worker, only update ****"
+else
+    echo "**** Root executable is still original, rename ****"
+    mv /usr/lib/plexmediaserver/'Plex Media Server' /usr/lib/plexmediaserver/pms_original
+fi
+
+echo "**** Move shim to destination ****"
+cp /app/start.sh /usr/lib/plexmediaserver/'Plex Media Server'
+
+echo "**** Make the shim executable ****"
+chmod +x /usr/lib/plexmediaserver/'Plex Media Server'
