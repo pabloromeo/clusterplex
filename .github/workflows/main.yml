@@ -9,6 +9,7 @@ on:
     branches:
       - 'master'
       - 'dev'
+      - 'experimental'
     tags:
       - 'v*.*.*'
   pull_request:
