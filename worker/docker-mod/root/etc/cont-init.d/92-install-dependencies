@@ -5,9 +5,13 @@ then
     echo "**** node is installed, skipping... ****"
 else
     echo "**** install runtime packages ****"
-    curl -sL https://deb.nodesource.com/setup_12.x | bash -
+    echo "**** install 'n' ****"
+    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
+    echo "**** install nodejs ****"
+    bash n 12
+    echo "**** apt-get update ****"
     apt-get update
-    echo "**** install Node.js & binutils ****"
-    apt-get install -y nodejs binutils
+    echo "**** install binutils ****"
+    apt-get install -y binutils libatomic1
 fi
 
