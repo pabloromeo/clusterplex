@@ -3,10 +3,12 @@ FROM linuxserver/plex:latest
 LABEL maintainer="pabloromeo"
 
 RUN echo "**** install runtime packages ****" && \
-    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    echo "**** install 'n' ****" && \
+    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
+    echo "**** install nodejs ****" && \
+    bash n 12 && \
+    echo "**** apt-get update ****" && \
     apt-get update && \
-    echo "**** install Node.js ****" && \
-    apt-get install -y nodejs && \
     echo "**** install binutils ****" && \
     apt-get install -y binutils && \
     echo "**** cleanup ****" && \
