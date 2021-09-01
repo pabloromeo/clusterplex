@@ -1,0 +1,14 @@
+#!/usr/bin/with-contenv bash
+
+if file /usr/lib/plexmediaserver/'Plex Transcoder' | grep -iq ASCII ; then
+    echo "**** Transcoder is already clusterplex, only update ****"
+else
+    echo "**** Transcoder is still original, rename ****"
+    mv /usr/lib/plexmediaserver/'Plex Transcoder' /usr/lib/plexmediaserver/originalTranscoder
+fi
+
+echo "**** Move shim to destination ****"
+cp /app/transcoder-shim.sh /usr/lib/plexmediaserver/'Plex Transcoder'
+
+echo "**** Make the shim executable ****"
+chmod +x /usr/lib/plexmediaserver/'Plex Transcoder'

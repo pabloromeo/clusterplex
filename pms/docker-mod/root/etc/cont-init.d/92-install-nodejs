@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+
+if which node > /dev/null
+then
+    echo "**** node is installed, skipping... ****"
+else
+    echo "**** install runtime packages ****"
+    echo "**** apt-get update ****"
+    apt-get update
+    echo "**** install libatomic1, file ****"
+    apt-get install -y libatomic1 file
+    echo "**** install 'n' ****"
+    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
+    echo "**** install nodejs ****"
+    bash n 12
+fi
+
