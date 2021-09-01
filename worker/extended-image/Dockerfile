@@ -3,14 +3,14 @@ FROM linuxserver/plex:latest
 LABEL maintainer="pabloromeo"
 
 RUN echo "**** install runtime packages ****" && \
-    echo "**** install 'n' ****" && \
-    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
-    echo "**** install nodejs ****" && \
-    bash n 12 && \
     echo "**** apt-get update ****" && \
     apt-get update && \
     echo "**** install binutils ****" && \
     apt-get install -y binutils libatomic1 && \
+    echo "**** install 'n' ****" && \
+    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
+    echo "**** install nodejs ****" && \
+    bash n 12 && \
     echo "**** cleanup ****" && \
     rm -rf \
         /tmp/* \
