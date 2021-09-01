@@ -11,17 +11,29 @@ ClusterPlex is basically an extended version of Plex, which supports distributed
 
 ![plex](images/plex-logo.png)
 
-## How it works
+## Components
 
 In order to be able to use multiple nodes for transcoding, it's made up of 3 parts:
 
-1. A custom Docker image based on the official linuxserver image, in which Plex’s own transcoder is renamed and a shim is put in its place which calls a small Node.js app that communicates with the Orchestrator container over websockets.
+* ### Plex Media Server
+  There are two alternatives here:
+  1. **RECOMMENDED:** Running the Official LinuxServer Plex image (ghcr.io/linuxserver/plex:latest) and applying the ClusterPlex dockermod (ghcr.io/pabloromeo/clusterplex_dockermod:latest)
+  2. Running the ClusterPlex PMS docker image (ghcr.io/pabloromeo/clusterplex_pms:latest)
+* ### Transcoding Orchestrator
+  Running a container using ghcr.io/pabloromeo/clusterplex_orchestrator:latest
+* ### Transcoding Workers
+  Just as with PMS, two alternatives:
+  1. **RECOMMENDED:** Official image (ghcr.io/linuxserver/plex:latest) with the Worker dockermod (ghcr.io/pabloromeo/clusterplex_worker_dockermod:latest)
+  2. Custom Docker image: ghcr.io/pabloromeo/clusterplex_worker:latest
 
-2. An Orchestrator (Node.js application which receives all transcoding requests from PMS and forwards it to one of the active Workers available over websockets.
+## How does it work?
 
-3. Worker docker image based on the PMS image as well, with a Node.js app running on it, which receives requests from the Orchestrator and kicks off the transcoding and reports progress back. Workers can come online or go offline and the Orchestrator manages their registrations and availability. These Workers can run as replicated services managed by the cluster.
+* In the customized PMS server, Plex’s own transcoder is renamed and a shim is put in its place which calls a small Node.js app that communicates with the Orchestrator container over websockets.
 
-Upgrading Plex when a new version comes out is basically just rebuilding the docker images to get the latest update.
+* The Orchestrator (Node.js application which receives all transcoding requests from PMS and forwards it to one of the active Workers available over websockets.
+
+* Workers receive requests from the Orchestrator and kick off the transcoding and report progress back to PMS. Workers can come online or go offline and the Orchestrator manages their registrations and availability. These Workers can run as replicated services managed by the cluster.
+
 
 **Important:** Plex’s Application Data and transcoding folders should be ideally in shared storage over NFS, SMB, Gluster or similar and the Media Libraries should all be mounted as volumes both in PMS and each worker node under the same paths. The Worker will invoke the transcoder using the original path arguments so the content should be available to every worker as well. 
 
@@ -29,9 +41,109 @@ Upgrading Plex when a new version comes out is basically just rebuilding the doc
 
 ![docker-swarm](images/docker-swarm.png)
 
-Docker swarm stack example:
+### Docker Swarm stack example using Dockermods:
+
+```yaml
+---
+version: '3.4'
+
+services:
+  plex:
+    image: ghcr.io/linuxserver/plex:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DOCKER_MODS: "ghcr.io/pabloromeo/clusterplex_dockermod:latest"
+      VERSION: docker
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/London
+      ORCHESTRATOR_URL: http://plex-orchestrator:3500
+      PMS_IP: 192.168.2.1
+      TRANSCODE_OPERATING_MODE: both #(local|remote|both)
+      TRANSCODER_VERBOSE: "1"   # 1=verbose, 0=silent
+    healthcheck:
+      test: curl -fsS http://localhost:32400/identity > /dev/null || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - /path/to/config:/config
+      - /path/to/backups:/backups
+      - /path/to/tv:/data/tv
+      - /path/to/movies:/data/movies
+      - /path/to/transcodedata:/transcode
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 32469:32469
+      - 32400:32400
+      - 3005:3005
+      - 8324:8324
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+
+  plex-orchestrator:
+    image: ghcr.io/pabloromeo/clusterplex_orchestrator:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: start-first
+    healthcheck:
+      test: curl -fsS http://localhost:3500/health > /dev/null || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    environment:
+      TZ: Europe/London
+      STREAM_SPLITTING: "OFF" # ON | OFF (default)
+      LISTENING_PORT: 3500
+      WORKER_SELECTION_STRATEGY: "LOAD_RANK" # RR | LOAD_CPU | LOAD_TASKS | LOAD_RANK (default)
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 3500:3500
+
+  plex-worker:
+    image: ghcr.io/linuxserver/plex:latest
+    hostname: "plex-worker-{{.Node.Hostname}}"
+    deploy:
+      mode: global
+      update_config:
+        order: start-first
+    environment:
+      DOCKER_MODS: "ghcr.io/pabloromeo/clusterplex_worker_dockermod:latest"
+      VERSION: docker
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/London
+      LISTENING_PORT: 3501      # used by the healthcheck
+      STAT_CPU_INTERVAL: 2000   # interval for reporting worker load metrics
+      ORCHESTRATOR_URL: http://plex-orchestrator:3500
+    healthcheck:
+      test: curl -fsS http://localhost:3501/health > /dev/null || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 240s
+    volumes:
+      - /path/to/codecs:/codecs # (optional, can be used to share codecs)
+      - /path/to/tv:/data/tv
+      - /path/to/movies:/data/movies
+      - /path/to/transcodedata:/transcode
+      - /etc/localtime:/etc/localtime:ro
 
 ```
+
+### Docker Swarm stack example using ClusterPlex docker images:
+
+```yaml
 ---
 version: '3.4'
 
