@@ -79,7 +79,14 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_pms.outputs.tags }}
           labels: ${{ steps.meta_pms.outputs.labels }}
-
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: pabloromeo/clusterplex_pms
+          readme-filepath: ./README.md
+          short-description: "PMS image for ClusterPlex"
   build-pms-docker-mod:
     runs-on: ubuntu-latest
     steps:
@@ -130,6 +137,14 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_pms_dockermod.outputs.tags }}
           labels: ${{ steps.meta_pms_dockermod.outputs.labels }}
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: pabloromeo/clusterplex_dockermod
+          readme-filepath: ./README.md
+          short-description: "ClusterPlex Dockermod for the LinuxServer/Plex image"
 
   build-worker:
     runs-on: ubuntu-latest
@@ -189,6 +204,14 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_worker.outputs.tags }}
           labels: ${{ steps.meta_worker.outputs.labels }}
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: pabloromeo/clusterplex_worker
+          readme-filepath: ./README.md
+          short-description: "Worker image for ClusterPlex"
 
   build-worker-docker-mod:
     runs-on: ubuntu-latest
@@ -242,6 +265,14 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_worker_dockermod.outputs.tags }}
           labels: ${{ steps.meta_worker_dockermod.outputs.labels }}
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: pabloromeo/clusterplex_worker_dockermod
+          readme-filepath: ./README.md
+          short-description: "ClusterPlex Worker Dockermod for the LinuxServer/Plex image"
 
   build-orchestrator:
     runs-on: ubuntu-latest
@@ -300,3 +331,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_orchestrator.outputs.tags }}
           labels: ${{ steps.meta_orchestrator.outputs.labels }}
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: pabloromeo/clusterplex_orchestrator
+          readme-filepath: ./README.md
+          short-description: "ClusterPlex Orchestrator image"
