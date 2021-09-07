@@ -13,13 +13,13 @@ updates:
       interval: "daily"
   - package-ecosystem: "npm"
     # Files stored in `app` directory
-    directory: "/pms"
+    directory: "/pms/app"
     target-branch: "dev"
     schedule:
       interval: "daily"
   - package-ecosystem: "npm"
     # Files stored in `app` directory
-    directory: "/worker"
+    directory: "/worker/app"
     target-branch: "dev"
     schedule:
       interval: "daily"
