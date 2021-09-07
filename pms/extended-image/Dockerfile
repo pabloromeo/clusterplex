@@ -10,7 +10,7 @@ RUN echo "**** install runtime packages ****" && \
     echo "**** install 'n' ****" && \
     curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
     echo "**** install nodejs ****" && \
-    bash n 12 && \
+    bash n lts && \
     echo "**** cleanup ****" && \
     rm -rf \
         /tmp/* \
