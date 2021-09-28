@@ -46,6 +46,7 @@ This would be using network shared storage, such as NFS, SMB, Ceph, Gluster, etc
 The same applies to the **/tmp** directory, in both PMS and the Workers. And the transcoding path configured in Plex should be a subdirectory of **/tmp**.
 
 Such as:
+
 ![docker-swarm](images/transcode-path.png)
 
 ### Codecs
