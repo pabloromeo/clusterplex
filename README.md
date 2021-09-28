@@ -34,8 +34,29 @@ In order to be able to use multiple nodes for transcoding, it's made up of 3 par
 
 * Workers receive requests from the Orchestrator and kick off the transcoding and report progress back to PMS. Workers can come online or go offline and the Orchestrator manages their registrations and availability. These Workers can run as replicated services managed by the cluster.
 
+## Shared content
 
-**Important:** Plex’s Application Data and transcoding folders should be ideally in shared storage over NFS, SMB, Gluster or similar and the Media Libraries should all be mounted as volumes both in PMS and each worker node under the same paths. The Worker will invoke the transcoder using the original path arguments so the content should be available to every worker as well. 
+### Media
+
+In order for Workers to function properly, all Media content should be shared using identical paths between PMS and the Workers.
+This would be using network shared storage, such as NFS, SMB, Ceph, Gluster, etc.
+
+### Temp & Transcoding location
+
+The same applies to the **/tmp** directory, in both PMS and the Workers. And the transcoding path configured in Plex should be a subdirectory of **/tmp**.
+
+Such as:
+![docker-swarm](images/transcode-path.png)
+
+### Codecs
+
+Workers require a path to store downloaded codecs for the particular architecture of the Worker.
+Codecs are downloaded as needed, whenever a transcoding request is received.
+
+These can be shared across Workers, if desired, in order to avoid downloading the same codec for each Worker, but it isn't mandatory.
+
+The path within the container is **/codecs**, which you can mount to a volume in order to have them persisted across container recreations. Subdirectories for each plex version and architecture are created within it.
+ 
 
 ## Example Docker Swarm Deployment
 
@@ -74,7 +95,7 @@ services:
       - /path/to/backups:/backups
       - /path/to/tv:/data/tv
       - /path/to/movies:/data/movies
-      - /path/to/transcodedata:/transcode
+      - /path/to/tmp:/tmp
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 32469:32469
@@ -136,7 +157,7 @@ services:
       - /path/to/codecs:/codecs # (optional, can be used to share codecs)
       - /path/to/tv:/data/tv
       - /path/to/movies:/data/movies
-      - /path/to/transcodedata:/transcode
+      - /path/to/tmp:/tmp
       - /etc/localtime:/etc/localtime:ro
 
 ```
@@ -173,7 +194,7 @@ services:
       - /path/to/backups:/backups
       - /path/to/tv:/data/tv
       - /path/to/movies:/data/movies
-      - /path/to/transcodedata:/transcode
+      - /path/to/tmp:/tmp
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 32469:32469
@@ -234,7 +255,7 @@ services:
       - /path/to/codecs:/codecs # (optional, can be used to share codecs)
       - /path/to/tv:/data/tv
       - /path/to/movies:/data/movies
-      - /path/to/transcodedata:/transcode
+      - /path/to/tmp:/tmp
       - /etc/localtime:/etc/localtime:ro
 
 ```
