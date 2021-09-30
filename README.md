@@ -337,6 +337,7 @@ The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/pl
 
 | Parameter | Function |
 | :----: | --- |
+| `FFMPEG_HWACCEL` | Allows a [hwaccel decoder](https://trac.ffmpeg.org/wiki/HWAccelIntro) to be passed to ffmpeg such as `nvdec` or `dvxa2` |
 | `LISTENING_PORT` | Port where workers expose the internal healthcheck |
 | `STAT_CPU_INTERVAL` | Frequency at which the worker sends stats to the orchestrator (in ms). Default 2000 |
 | `ORCHESTRATOR_URL` | The url where the orchestrator service can be reached (ex: http://plex-orchestrator:3500) |
