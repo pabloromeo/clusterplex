@@ -9,6 +9,8 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 // remote
 // both
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
+// hwaccel decoder: https://trac.ffmpeg.org/wiki/HWAccelIntro
+const TRANSCODE_FFMPEG_HWACCEL = process.env.TRANSCODE_FFMPEG_HWACCEL || false
 
 const { spawn } = require('child_process');
 var ON_DEATH = require('death')({debug: true})
@@ -43,6 +45,16 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
         console.log(`cwd => ${JSON.stringify(workDir)}`)
         console.log(`args => ${JSON.stringify(newArgs)}`)
         console.log(`env => ${JSON.stringify(environmentVariables)}`)
+    }
+
+    if (TRANSCODE_FFMPEG_HWACCEL != false) {
+        console.log(`Setting hwaccel to ${TRANSCODE_FFMPEG_HWACCEL}`)
+        let i = newArgs.indexOf('-hwaccel')
+        if (i > 0) {
+            newArgs[i+1] = TRANSCODE_FFMPEG_HWACCEL
+        } else {
+            newArgs.unshift('-hwaccel', TRANSCODE_FFMPEG_HWACCEL)
+        }
     }
     
     jobPoster.postJob(ORCHESTRATOR_URL, 
