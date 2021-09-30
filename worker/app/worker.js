@@ -4,6 +4,8 @@ const STAT_CPU_OPS_DURATION = process.env.STAT_CPU_OPS_DURATION || 1000
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
+// hwaccel decoder: https://trac.ffmpeg.org/wiki/HWAccelIntro
+const FFMPEG_HWACCEL = process.env.FFMPEG_HWACCEL || false
 
 var app = require('express')();
 var server = require('http').createServer(app);
@@ -83,6 +85,16 @@ socket.on('worker.task.request', taskRequest => {
         console.log('Starting test of waiting for 5 seconds')
         child = exec('sleep 5');
     } else {
+        if (FFMPEG_HWACCEL != false) {
+            console.log(`Setting hwaccel to ${FFMPEG_HWACCEL}`)
+            let i = taskRequest.payload.args.indexOf('-hwaccel')
+            if (i > 0) {
+                taskRequest.payload.args[i+1] = FFMPEG_HWACCEL
+            } else {
+                taskRequest.payload.args.unshift('-hwaccel', FFMPEG_HWACCEL)
+            }
+        }
+
         child = spawn(TRANSCODER_PATH + TRANSCODER_NAME, taskRequest.payload.args, {
             cwd: taskRequest.payload.cwd,
             env: processedEnvironmentVariables
