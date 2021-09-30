@@ -37,16 +37,6 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
         setValueOf(newArgs, '-loglevel_plex', 'verbose')    
     }
 
-    let environmentVariables = process.env
-    let workDir = process.cwd()
-
-    console.log(`Sending request to orchestrator on: ${ORCHESTRATOR_URL}`)
-    if (TRANSCODER_VERBOSE == '1') {
-        console.log(`cwd => ${JSON.stringify(workDir)}`)
-        console.log(`args => ${JSON.stringify(newArgs)}`)
-        console.log(`env => ${JSON.stringify(environmentVariables)}`)
-    }
-
     if (TRANSCODE_FFMPEG_HWACCEL != false) {
         console.log(`Setting hwaccel to ${TRANSCODE_FFMPEG_HWACCEL}`)
         let i = newArgs.indexOf('-hwaccel')
@@ -55,6 +45,16 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
         } else {
             newArgs.unshift('-hwaccel', TRANSCODE_FFMPEG_HWACCEL)
         }
+    }
+
+    let environmentVariables = process.env
+    let workDir = process.cwd()
+
+    console.log(`Sending request to orchestrator on: ${ORCHESTRATOR_URL}`)
+    if (TRANSCODER_VERBOSE == '1') {
+        console.log(`cwd => ${JSON.stringify(workDir)}`)
+        console.log(`args => ${JSON.stringify(newArgs)}`)
+        console.log(`env => ${JSON.stringify(environmentVariables)}`)
     }
     
     jobPoster.postJob(ORCHESTRATOR_URL, 
