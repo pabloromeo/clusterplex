@@ -9,6 +9,7 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 // remote
 // both
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
+const TRANSCODE_EAE_LOCALLY = process.env.TRANSCODE_EAE_LOCALLY || false
 
 const { spawn } = require('child_process');
 var ON_DEATH = require('death')({debug: true})
@@ -16,6 +17,9 @@ var ON_DEATH = require('death')({debug: true})
 var jobPoster = require('./jobPoster')
 
 if (TRANSCODE_OPERATING_MODE == 'local') {
+    transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
+} else if (TRANSCODE_EAE_LOCALLY && process.argv.slice(2).filter(s => s.includes('eae_prefix')).length > 0) {
+    console.log('EasyAudioEncoder used, forcing local transcode')
     transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
 } else {
     function setValueOf(arr, key, newValue) {
