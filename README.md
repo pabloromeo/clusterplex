@@ -36,6 +36,11 @@ In order to be able to use multiple nodes for transcoding, it's made up of 3 par
 
 ## Shared content
 
+### Plex Application Data
+**WARNING:** PMS's Application Data mount (/config) doesn't need to be shared with the Workers, so you can use your preferred method for persistent storage. However, beware that Plex doesn't play very well with network storage for this, especially regarding symlinks and file locks (used by their sqlite db).
+
+For this reason CIFS/SMB should be avoided for this mount. NFS has been shown to work, as well as GlusterFS.
+
 ### Media
 
 In order for Workers to function properly, all Media content should be shared using identical paths between PMS and the Workers.
@@ -331,6 +336,9 @@ worker_load_tasks{worker_id="61e06076-4b9e-4d83-bcaa-1385f2d8f414",worker_name="
 Using these metrics you can create Dashboards in something like Grafana, such as:
 
 ![grafana-metrics](images/grafana-metrics.png)
+
+Dashboard JSON file:
+[samples/grafana-dashboard.json](samples/grafana-dashboard.json)
 
 ### Workers
 
