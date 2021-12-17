@@ -101,11 +101,11 @@ function transcodeLocally(cwd, args, env) {
 
 function extractPrimaryCodec(argList) {
     let indexPrimaryCodec = argList.findIndex(s => s == '-codec:0') + 1
-    return (indexPrimaryCodec != 0 && argList.length >= indexPrimaryCodec) ? argList[indexPrimaryCodec] : ''
+    return (indexPrimaryCodec != 0 && argList.length >= indexPrimaryCodec) ? argList[indexPrimaryCodec].toLowerCase() : ''
 }
 
 function codecIgnored(codecString) {
-    return (codecString == '') ? false : IGNORED_CODECS.split(",").map(item=>item.trim()).includes(codecString)
+    return (codecString == '') ? false : IGNORED_CODECS.toLowerCase().split(",").map(item=>item.trim()).includes(codecString)
 }
 
 ON_DEATH( (signal, err) => {
