@@ -281,6 +281,7 @@ The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/pl
 | `TRANSCODE_EAE_LOCALLY` | Force media which requires EasyAudioEncoder to transcode locally |
 | `TRANSCODE_OPERATING_MODE` | "local" => only local transcoding (no workers), "remote" => only remote workers transcoding, "both" (default) => Remote first, local if it fails |
 | `TRANSCODER_VERBOSE` | "0" (default) => info level, "1" => debug logging |
+| `IGNORED_CODECS` | Comma separated list of codecs that will always transcode locally |
 
 ### Orchestrator
 
