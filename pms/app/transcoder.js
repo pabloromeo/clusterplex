@@ -23,15 +23,9 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
 } else if (TRANSCODE_EAE_LOCALLY && process.argv.slice(2).filter(s => s.includes('eae_prefix')).length > 0) {
     console.log('EasyAudioEncoder used, forcing local transcode')
     transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
-} else if (IGNORED_CODECS.length > 0) {
-    let indexPrimaryCodec = process.argv.slice(2).findIndex(s => s == '-codec:0')
-    if (indexPrimaryCodec != -1 && process.argv.slice(2).length > indexPrimaryCodec + 1) {
-        let codecPrimary = process.argv.slice(2)[indexPrimaryCodec + 1]
-        if (IGNORED_CODECS.split(",").map(item=>item.trim()).includes(codecPrimary)) {
-            console.log('Primary codec (' + codecPrimary + ') on ignore list, forcing local transcode')
-            transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
-        }
-    }
+} else if (IGNORED_CODECS && codecIgnored(extractPrimaryCodec(process.argv.slice(2)))) {
+    console.log('Primary codec (' + extractPrimaryCodec(process.argv.slice(2)) + ') on ignore list, forcing local transcode')
+    transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
 } else {
     function setValueOf(arr, key, newValue) {
         let i = arr.indexOf(key)
@@ -103,6 +97,15 @@ function transcodeLocally(cwd, args, env) {
         console.log('Completed local transcode');
         process.exit(withErrors);
     });
+}
+
+function extractPrimaryCodec(argList) {
+    let indexPrimaryCodec = argList.findIndex(s => s == '-codec:0') + 1
+    return (indexPrimaryCodec != 0 && argList.length >= indexPrimaryCodec) ? argList[indexPrimaryCodec] : ''
+}
+
+function codecIgnored(codecString) {
+    return (codecString == '') ? false : IGNORED_CODECS.split(",").map(item=>item.trim()).includes(codecString)
 }
 
 ON_DEATH( (signal, err) => {
