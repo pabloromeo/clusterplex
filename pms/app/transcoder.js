@@ -10,8 +10,8 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 // both
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
 const TRANSCODE_EAE_LOCALLY = process.env.TRANSCODE_EAE_LOCALLY || false
-// comma separated list of ignored codecs:
-const IGNORED_CODECS = process.env.IGNORED_CODECS || ''
+// comma separated list of codecs to transcode locally:
+const TRANSCODE_CODECS_LOCALLY = process.env.TRANSCODE_CODECS_LOCALLY || ''
 
 const { spawn } = require('child_process');
 var ON_DEATH = require('death')({debug: true})
@@ -23,7 +23,7 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
 } else if (TRANSCODE_EAE_LOCALLY && process.argv.slice(2).filter(s => s.includes('eae_prefix')).length > 0) {
     console.log('EasyAudioEncoder used, forcing local transcode')
     transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
-} else if (IGNORED_CODECS && codecIgnored(extractPrimaryCodec(process.argv.slice(2)))) {
+} else if (TRANSCODE_CODECS_LOCALLY && codecIgnored(extractPrimaryCodec(process.argv.slice(2)))) {
     console.log('Primary codec (' + extractPrimaryCodec(process.argv.slice(2)) + ') on ignore list, forcing local transcode')
     transcodeLocally(process.cwd(), process.argv.slice(2), process.env)
 } else {
@@ -105,7 +105,7 @@ function extractPrimaryCodec(argList) {
 }
 
 function codecIgnored(codecString) {
-    return (codecString == '') ? false : IGNORED_CODECS.toLowerCase().split(",").map(item=>item.trim()).includes(codecString)
+    return (codecString == '') ? false : TRANSCODE_CODECS_LOCALLY.toLowerCase().split(",").map(item=>item.trim()).includes(codecString)
 }
 
 ON_DEATH( (signal, err) => {
