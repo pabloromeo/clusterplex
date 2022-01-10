@@ -54,7 +54,7 @@ The same applies to the **/tmp** directory, in both PMS and the Workers. And the
 
 Such as:
 
-![docker-swarm](images/transcode-path.png)
+![transcode-path](images/transcode-path.png)
 
 ### Codecs
 
@@ -65,6 +65,12 @@ These can be shared across Workers, if desired, in order to avoid downloading th
 
 The path within the container is **/codecs**, which you can mount to a volume in order to have them persisted across container recreations. Subdirectories for each plex version and architecture are created within it.
  
+## Network settings in PMS ##
+In Plex's `Network` Configuration, add Docker's VLAN (or the range that will be used by Workers) to the `"List of IP addresses and networks that are allowed without auth"`.
+
+For example:
+![network-ips](images/network-ips.png)
+
 
 ## Example Docker Swarm Deployment
 
