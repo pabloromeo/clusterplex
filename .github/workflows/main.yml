@@ -28,7 +28,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       # https://github.com/docker/setup-qemu-action
       - name: Set up QEMU
@@ -94,7 +94,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
@@ -155,7 +155,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       # https://github.com/docker/setup-qemu-action
       - name: Set up QEMU
@@ -224,7 +224,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
@@ -287,7 +287,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       # https://github.com/docker/setup-qemu-action
       - name: Set up QEMU
