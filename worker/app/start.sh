@@ -37,7 +37,6 @@ cd ${CODEC_PATH}
 cat /app/codecs.txt | while read line 
 do
   codec=${line//[$'\t\r\n']}
-  echo "Processing codec ${codec}..."
   if [ -f "${codec}.so" ]; then
     echo "Codec ${codec}.so already exists. Skipping"
   else 
