@@ -30,7 +30,9 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
     }
 
     let newArgs = process.argv.slice(2).map((v) => {
-        return v.replace('127.0.0.1:', `${PMS_IP}:`)
+        return v
+            .replace('127.0.0.1:', `${PMS_IP}:`)
+            .replace('aac_lc', 'aac');  // workaround for error -> Unknown decoder 'aac_lc'
     })
 
     if (TRANSCODER_VERBOSE == '1') {
