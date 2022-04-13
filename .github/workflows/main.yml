@@ -82,7 +82,7 @@ jobs:
           labels: ${{ steps.meta_pms.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -142,7 +142,7 @@ jobs:
           labels: ${{ steps.meta_pms_dockermod.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -211,7 +211,7 @@ jobs:
           labels: ${{ steps.meta_worker.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -274,7 +274,7 @@ jobs:
           labels: ${{ steps.meta_worker_dockermod.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -342,7 +342,7 @@ jobs:
           labels: ${{ steps.meta_orchestrator.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
