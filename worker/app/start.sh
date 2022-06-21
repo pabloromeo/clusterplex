@@ -23,6 +23,10 @@ case "${PLEX_ARCH}" in
     CLUSTERPLEX_PLEX_CODEC_ARCH="linux-armv7neon-standard"
     INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL="armv7l"
     ;;
+  arm64)
+    CLUSTERPLEX_PLEX_CODEC_ARCH="linux-aarch64-standard"
+    INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL="aarch64"
+    ;;
 esac
 
 echo "CLUSTERPLEX_PLEX_CODEC_ARCH => ${CLUSTERPLEX_PLEX_CODEC_ARCH}"
@@ -34,12 +38,12 @@ mkdir -p ${CODEC_PATH}
 cd ${CODEC_PATH}
 
 #original list: libhevc_decoder libh264_decoder libdca_decoder libac3_decoder libmp3_decoder libaac_decoder libaac_encoder libmpeg4_decoder libmpeg2video_decoder liblibmp3lame_encoder liblibx264_encoder; do
-cat /app/codecs.txt | while read line 
+cat /app/codecs.txt | while read line
 do
   codec=${line//[$'\t\r\n']}
   if [ -f "${codec}.so" ]; then
     echo "Codec ${codec}.so already exists. Skipping"
-  else 
+  else
     echo "Codec ${codec}.so does not exist. Downloading..."
     wget https://downloads.plex.tv/codecs/${CLUSTERPLEX_PLEX_CODECS_VERSION}/${CLUSTERPLEX_PLEX_CODEC_ARCH}/${codec}.so
   fi
