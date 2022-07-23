@@ -10,6 +10,7 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 // both
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
 const TRANSCODE_EAE_LOCALLY = process.env.TRANSCODE_EAE_LOCALLY || false
+const FORCE_HTTPS = process.env.FORCE_HTTPS || "0"
 
 const { spawn } = require('child_process');
 var ON_DEATH = require('death')({debug: true})
@@ -29,9 +30,16 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
         }
     }
 
+    let networkProtocol = "http";
+    if (FORCE_HTTPS == '1') {
+        console.log('Forcing HTTPS in progress callback');
+        networkProtocol = "https";
+    }
+
     let newArgs = process.argv.slice(2).map((v) => {
         return v
-            .replace('127.0.0.1:', `${PMS_IP}:`)
+            .replace('http://127.0.0.1:', `${networkProtocol}://${PMS_IP}:`)
+            .replace('https://127.0.0.1:', `https://${PMS_IP}:`)
             .replace('aac_lc', 'aac');  // workaround for error -> Unknown decoder 'aac_lc'
     })
 
