@@ -287,6 +287,7 @@ The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/pl
 | `TRANSCODE_EAE_LOCALLY` | Force media which requires EasyAudioEncoder to transcode locally |
 | `TRANSCODE_OPERATING_MODE` | "local" => only local transcoding (no workers), "remote" => only remote workers transcoding, "both" (default) => Remote first, local if it fails |
 | `TRANSCODER_VERBOSE` | "0" (default) => info level, "1" => debug logging |
+| `FORCE_HTTPS` | "0" (Default) uses Plex's default http callback, "1" forces HTTPS to be used.<br>**IMPORTANT:** You must set this to "1" if you have set "Secure Connections" in Plex to "Required". |
 
 ### Orchestrator
 
