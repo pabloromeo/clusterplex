@@ -56,7 +56,7 @@ then
   echo "Extracting License Key"
   EAE_LICENSE_KEY=$(grep -Po 'license="([A-Za-z0-9]{10}\s\K[A-Za-z0-9]{60}\s[A-Za-z0-9]{64})' eae.xml)
   EAE_LICENSE_CONTENT="lifetime ${EAE_LICENSE_KEY}"
-  EAE_LICENSE_PATH="/codecs/EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}/EasyAudioEncoder/eae-license.txt"
+  EAE_LICENSE_PATH="${CODEC_PATH}/EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}/EasyAudioEncoder/eae-license.txt"
   echo "License Path output => ${EAE_LICENSE_PATH}"
   echo $EAE_LICENSE_CONTENT >> $EAE_LICENSE_PATH
 fi
