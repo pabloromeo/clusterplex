@@ -41,7 +41,7 @@ if [ "$EXP_EAE_SUPPORT" == "true" ]
 then
   EAE_VERSION=1785 # fixed for now
 
-  if [ -d "${CODEC_PATH}/EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}" ]
+  if [ -d "${CODEC_PATH}/EasyAudioEncoder" ]
   then
     echo "EasyAudioEncoder already present"
   else
@@ -56,12 +56,12 @@ then
     echo "Downloading EasyAudioEncoder"
     curl -s -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" "${EAE_CODEC_URL}"
     echo "Decompressing EasyAudioEncoder"
-    unzip -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" -d "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}"
+    unzip -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" -d "EasyAudioEncoder"
     # extract license key
     echo "Extracting License Key"
     EAE_LICENSE_KEY=$(grep -Po 'license="\K([A-Za-z0-9]{10}\s[A-Za-z0-9]{60}\s[A-Za-z0-9]{64})' eae.xml)
     EAE_LICENSE_CONTENT="${EAE_LICENSE_KEY}"
-    EAE_LICENSE_PATH="${CODEC_PATH}/EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}/EasyAudioEncoder/eae-license.txt"
+    EAE_LICENSE_PATH="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/eae-license.txt"
     echo "License Path output => ${EAE_LICENSE_PATH}"
     echo $EAE_LICENSE_CONTENT >> $EAE_LICENSE_PATH
   fi
