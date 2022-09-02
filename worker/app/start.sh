@@ -56,7 +56,7 @@ then
     echo "Downloading EasyAudioEncoder"
     curl -s -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" "${EAE_CODEC_URL}"
     echo "Decompressing EasyAudioEncoder"
-    unzip "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" -d "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}"
+    unzip -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" -d "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}"
     # extract license key
     echo "Extracting License Key"
     EAE_LICENSE_KEY=$(grep -Po 'license="([A-Za-z0-9]{10}\s\K[A-Za-z0-9]{60}\s[A-Za-z0-9]{64})' eae.xml)
