@@ -37,6 +37,30 @@ echo "Codec location => ${CODEC_PATH}"
 mkdir -p ${CODEC_PATH}
 cd ${CODEC_PATH}
 
+if [ "$EXP_EAE_SUPPORT" == "true" ]
+then
+  EAE_VERSION=1785 # fixed for now
+  echo "Downloading EasyAudioEncoder version => ${EAE_VERSION}"
+  UUID=$(cat /proc/sys/kernel/random/uuid)
+  # download eae definition to eae.xml
+  curl -s -o eae.xml "https://plex.tv/api/codecs/easyaudioencoder?build=${CLUSTERPLEX_PLEX_CODEC_ARCH}&deviceId=${UUID}&oldestPreviousVersion=${CLUSTERPLEX_PLEX_VERSION}&version=${EAE_VERSION}"
+
+  # extract codec url
+  EAE_CODEC_URL=$(grep -Pio 'Codec url="\K[^"]*' eae.xml)
+  echo "EAE_CODEC_URL => ${EAE_CODEC_URL}"
+  echo "Downloading EasyAudioEncoder"
+  curl -s -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" "${EAE_CODEC_URL}"
+  echo "Decompressing EasyAudioEncoder"
+  unzip "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" -d "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}"
+  # extract license key
+  echo "Extracting License Key"
+  EAE_LICENSE_KEY=$(grep -Po 'license="([A-Za-z0-9]{10}\s\K[A-Za-z0-9]{60}\s[A-Za-z0-9]{64})' eae.xml)
+  EAE_LICENSE_CONTENT="lifetime ${EAE_LICENSE_KEY}"
+  EAE_LICENSE_PATH="/codecs/EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}/EasyAudioEncoder/eae-license.txt"
+  echo "License Path output => ${EAE_LICENSE_PATH}"
+  echo $EAE_LICENSE_CONTENT >> $EAE_LICENSE_PATH
+fi
+
 #original list: libhevc_decoder libh264_decoder libdca_decoder libac3_decoder libmp3_decoder libaac_decoder libaac_encoder libmpeg4_decoder libmpeg2video_decoder liblibmp3lame_encoder liblibx264_encoder; do
 cat /app/codecs.txt | while read line
 do
