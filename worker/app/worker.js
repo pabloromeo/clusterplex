@@ -108,6 +108,12 @@ socket.on('worker.task.request', taskRequest => {
                 cwd: processedEnvironmentVariables.EAE_ROOT,
                 env: processedEnvironmentVariables
             });
+            childEAE.stdout.pipe(process.stdout);
+            childEAE.stderr.pipe(process.stderr);
+            childEAE.on('error', (err) => {
+                console.error('EAE failed:')
+                console.error(err)
+            })
         } else {
             childEAE = null
         }
