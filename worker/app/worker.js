@@ -103,7 +103,7 @@ socket.on('worker.task.request', taskRequest => {
                 console.log(`Experimental EAE Support - Creating EAE_ROOT destination`)
                 fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });
             }
-            console.log(`Experimental EAE Support - Spawning EasyAudioEncoder at ${EXP_EAE_EXECUTABLE}, cwd => ${processedEnvironmentVariables.EAE_ROOT}`)
+            console.log(`Experimental EAE Support - Spawning EasyAudioEncoder from "${EXP_EAE_EXECUTABLE}", cwd => ${processedEnvironmentVariables.EAE_ROOT}`)
             childEAE = spawn(EXP_EAE_EXECUTABLE, {}, {
                 cwd: processedEnvironmentVariables.EAE_ROOT,
                 env: processedEnvironmentVariables

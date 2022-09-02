@@ -81,7 +81,7 @@ done
 
 export FFMPEG_EXTERNAL_LIBS="${CODEC_PATH}/"
 export PLEX_MEDIA_SERVER_INFO_MODEL="${INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL}"
-export EAE_EXECUTABLE="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/EasyAudioEncoder"
+export EXP_EAE_EXECUTABLE="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/EasyAudioEncoder"
 
 cd /app
 
