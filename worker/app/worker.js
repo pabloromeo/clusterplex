@@ -103,19 +103,24 @@ socket.on('worker.task.request', taskRequest => {
                 console.log(`Experimental EAE Support - Creating EAE_ROOT destination`)
                 fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });
             }
-            /*
+
             console.log(`Experimental EAE Support - Spawning EasyAudioEncoder from "${EXP_EAE_EXECUTABLE}", cwd => ${processedEnvironmentVariables.EAE_ROOT}`)
-            childEAE = spawn(EXP_EAE_EXECUTABLE, {}, {
+            childEAE = spawn(EXP_EAE_EXECUTABLE, [], {
                 cwd: processedEnvironmentVariables.EAE_ROOT,
                 env: processedEnvironmentVariables
             });
             childEAE.stdout.pipe(process.stdout);
             childEAE.stderr.pipe(process.stderr);
             childEAE.on('error', (err) => {
-                console.error('EAE failed:')
+                console.error('Experimental EAE Support - EAE failed:')
                 console.error(err)
             })
-            */
+            childEAE.on('close', () => {
+                console.log('Experimental EAE Support - Closing')
+            })
+            childEAE.on('exit', () => {
+                console.log('Experimental EAE Support - Exiting')
+            })       
         } else {
             childEAE = null
         }
