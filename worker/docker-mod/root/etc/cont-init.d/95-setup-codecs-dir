@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** Setting up codecs directory ****"
+if [ -d "/codecs" ]
+then
+    echo "Directory already present"
+else
+    echo "Creating /codecs and changing ownership"
+    mkdir -p /codecs 
+    chown abc:abc /codecs
+fi
