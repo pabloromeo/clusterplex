@@ -5,8 +5,8 @@ LABEL maintainer="pabloromeo"
 RUN echo "**** install runtime packages ****" && \
     echo "**** apt-get update ****" && \
     apt-get update && \
-    echo "**** install binutils ****" && \
-    apt-get install -y binutils libatomic1 && \
+    echo "**** install binutils libatomic1 unzip ****" && \
+    apt-get install -y binutils libatomic1 unzip && \
     echo "**** install 'n' ****" && \
     curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
     echo "**** install nodejs ****" && \

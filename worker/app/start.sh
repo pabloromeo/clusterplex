@@ -5,11 +5,13 @@ cd /usr/lib/plexmediaserver
 CLUSTERPLEX_PLEX_VERSION=$(strings "pms_original" | grep -P '^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)-[0-9a-f]{9}')
 CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Transcoder" | grep -Po '[0-9a-f]{7}-[0-9]{4}$')
 CLUSTERPLEX_PLEX_EAE_VERSION=$(printf "eae-`strings "pms_original" | grep -P '^EasyAudioEncoder-eae-[0-9a-f]{7}-$' | cut -d- -f3`-42")
+EAE_VERSION=1785 # fixed for now
 
 echo "CLUSTERPLEX_PLEX_VERSION => '${CLUSTERPLEX_PLEX_VERSION}'"
 echo "CLUSTERPLEX_PLEX_CODECS_VERSION => '${CLUSTERPLEX_PLEX_CODECS_VERSION}'"
-echo "CLUSTERPLEX_PLEX_EAE_VERSION => '${CLUSTERPLEX_PLEX_EAE_VERSION}'"
+echo "CLUSTERPLEX_PLEX_EAE_VERSION (extracted) => '${CLUSTERPLEX_PLEX_EAE_VERSION}'"
 echo "PLEX_ARCH => '${PLEX_ARCH}'"
+echo "EAE_VERSION => '${EAE_VERSION}'"
 
 CLUSTERPLEX_PLEX_CODEC_ARCH="${PLEX_ARCH}"
 INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL=""
@@ -37,6 +39,36 @@ echo "Codec location => ${CODEC_PATH}"
 mkdir -p ${CODEC_PATH}
 cd ${CODEC_PATH}
 
+if [ "$EAE_SUPPORT" == "false" ]
+then
+  echo "EAE_SUPPORT is turned off => ${EAE_SUPPORT}, skipping EasyAudioEncoder download"
+else
+  if [ -d "${CODEC_PATH}/EasyAudioEncoder" ]
+  then
+    echo "EasyAudioEncoder already present"
+  else
+    echo "Downloading EasyAudioEncoder version => ${EAE_VERSION}"
+    UUID=$(cat /proc/sys/kernel/random/uuid)
+    # download eae definition to eae.xml
+    curl -s -o eae.xml "https://plex.tv/api/codecs/easyaudioencoder?build=${CLUSTERPLEX_PLEX_CODEC_ARCH}&deviceId=${UUID}&oldestPreviousVersion=${CLUSTERPLEX_PLEX_VERSION}&version=${EAE_VERSION}"
+
+    # extract codec url
+    EAE_CODEC_URL=$(grep -Pio 'Codec url="\K[^"]*' eae.xml)
+    echo "EAE_CODEC_URL => ${EAE_CODEC_URL}"
+    echo "Downloading EasyAudioEncoder"
+    curl -s -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" "${EAE_CODEC_URL}"
+    echo "Decompressing EasyAudioEncoder"
+    unzip -o "EasyAudioEncoder-${EAE_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}.zip" -d "EasyAudioEncoder"
+    # extract license key
+    echo "Extracting License Key"
+    EAE_LICENSE_KEY=$(grep -Po 'license="\K([A-Za-z0-9]{10}\s[A-Za-z0-9]{60}\s[A-Za-z0-9]{64})' eae.xml)
+    EAE_LICENSE_CONTENT="${EAE_LICENSE_KEY}"
+    EAE_LICENSE_PATH="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/eae-license.txt"
+    echo "License Path output => ${EAE_LICENSE_PATH}"
+    echo $EAE_LICENSE_CONTENT >> $EAE_LICENSE_PATH
+  fi
+fi
+
 #original list: libhevc_decoder libh264_decoder libdca_decoder libac3_decoder libmp3_decoder libaac_decoder libaac_encoder libmpeg4_decoder libmpeg2video_decoder liblibmp3lame_encoder liblibx264_encoder; do
 cat /app/codecs.txt | while read line
 do
@@ -49,8 +81,9 @@ do
   fi
 done
 
-export FFMPEG_EXTERNAL_LIBS="/codecs/${CLUSTERPLEX_PLEX_CODECS_VERSION}-${CLUSTERPLEX_PLEX_CODEC_ARCH}/"
+export FFMPEG_EXTERNAL_LIBS="${CODEC_PATH}/"
 export PLEX_MEDIA_SERVER_INFO_MODEL="${INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL}"
+export EAE_EXECUTABLE="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/EasyAudioEncoder"
 
 cd /app
 

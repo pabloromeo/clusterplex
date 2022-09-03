@@ -4,13 +4,21 @@ const STAT_CPU_OPS_DURATION = process.env.STAT_CPU_OPS_DURATION || 1000
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
+const EAE_SUPPORT = process.env.EAE_SUPPORT || "true"
+const EAE_EXECUTABLE = process.env.EAE_EXECUTABLE || ""
 // hwaccel decoder: https://trac.ffmpeg.org/wiki/HWAccelIntro
 const FFMPEG_HWACCEL = process.env.FFMPEG_HWACCEL || false
+
+// Settings debug info
+console.log(`EAE_SUPPORT => ${EAE_SUPPORT}`)
+console.log(`EAE_EXECUTABLE => ${EAE_EXECUTABLE}`)
+console.log(`FFMPEG_HWACCEL => ${FFMPEG_HWACCEL}`)
 
 var app = require('express')();
 var server = require('http').createServer(app);
 var socket = require('socket.io-client')(ORCHESTRATOR_URL);
 var cpuStat = require('cpu-stat');
+var fs = require('fs');
 const { spawn, exec } = require('child_process');
 const { v4: uuid } = require('uuid');
 const { fib, dist } = require('cpu-benchmark');
@@ -78,7 +86,7 @@ socket.on('worker.task.request', taskRequest => {
 
     var processedEnvironmentVariables = processEnv(taskRequest.payload.env)
 
-    var child
+    var child, childEAE
     if (taskRequest.payload.args[0] === 'testpayload') {
         console.log(`args => ${JSON.stringify(taskRequest.payload.args)}`)
         console.log(`env => ${JSON.stringify(processedEnvironmentVariables)}`)
@@ -95,13 +103,40 @@ socket.on('worker.task.request', taskRequest => {
             }
         }
 
+        if (EAE_SUPPORT == "true" && EAE_EXECUTABLE != "") {
+            if (!fs.existsSync(processedEnvironmentVariables.EAE_ROOT)){
+                console.log(`EAE Support - Creating EAE_ROOT destination`)
+                fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });
+            }
+
+            console.log(`EAE Support - Spawning EasyAudioEncoder from "${EAE_EXECUTABLE}", cwd => ${processedEnvironmentVariables.EAE_ROOT}`)
+            childEAE = spawn(EAE_EXECUTABLE, [], {
+                cwd: processedEnvironmentVariables.EAE_ROOT,
+                env: processedEnvironmentVariables
+            });
+            childEAE.stdout.pipe(process.stdout);
+            childEAE.stderr.pipe(process.stderr);
+            childEAE.on('error', (err) => {
+                console.error('EAE Support - EAE failed:')
+                console.error(err)
+            })
+            childEAE.on('close', () => {
+                console.log('EAE Support - Closing')
+            })
+            childEAE.on('exit', () => {
+                console.log('EAE Support - Exiting')
+            })       
+        } else {
+            childEAE = null
+        }
+
         child = spawn(TRANSCODER_PATH + TRANSCODER_NAME, taskRequest.payload.args, {
             cwd: taskRequest.payload.cwd,
             env: processedEnvironmentVariables
         });
     }
 
-    taskMap.set(taskRequest.taskId, child)
+    taskMap.set(taskRequest.taskId, { transcodeProcess: child, eaeProcess: childEAE })
 
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
@@ -140,8 +175,11 @@ socket.on('worker.task.request', taskRequest => {
 socket.on('worker.task.kill', data => {
     let taskEntry = taskMap.get(data.taskId)
     if (taskEntry) {
-        console.log(`Killing child process for task ${data.taskId}`)
-        taskEntry.kill()
+        console.log(`Killing child processes for task ${data.taskId}`)
+        taskEntry.transcodeProcess.kill()
+        if (taskEntry.eaeProcess != null) {
+            taskEntry.eaeProcess.kill()
+        }
         console.log('Removing process from taskMap')
         taskMap.delete(data.taskId)
     }
