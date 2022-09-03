@@ -4,7 +4,7 @@ LABEL maintainer="pabloromeo"
 
 RUN mkdir -p /root-layer/app
 RUN mkdir -p /root-layer/codecs
-RUN chmod 666 /root-layer/codecs
+RUN chown abc:abc /root-layer/codecs
 
 # copy local files
 COPY /docker-mod/root/ /root-layer/
