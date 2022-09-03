@@ -3,6 +3,7 @@ FROM alpine as buildstage
 LABEL maintainer="pabloromeo"
 
 RUN mkdir -p /root-layer/app
+RUN mkdir -p /root-layer/codecs
 
 # copy local files
 COPY /docker-mod/root/ /root-layer/
