@@ -4,11 +4,11 @@ LABEL maintainer="pabloromeo"
 
 RUN mkdir -p /root-layer/app
 RUN mkdir -p /root-layer/codecs
-RUN chown abc:abc /root-layer/codecs
 
 # copy local files
 COPY /docker-mod/root/ /root-layer/
 COPY /app /root-layer/app
+COPY /codecs /root-layer/codecs
 
 FROM scratch
 
