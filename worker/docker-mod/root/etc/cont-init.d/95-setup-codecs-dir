@@ -2,4 +2,4 @@
 
 echo "**** Setting up codecs directory ****"
 mkdir -p /codecs 
-chown abc /codecs
+chown abc:abc /codecs
