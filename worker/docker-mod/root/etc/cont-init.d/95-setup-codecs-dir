@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** Setting up codecs directory ****"
+s6-setuidgid abc mkdir -p /codecs 
