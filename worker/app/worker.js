@@ -4,10 +4,15 @@ const STAT_CPU_OPS_DURATION = process.env.STAT_CPU_OPS_DURATION || 1000
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
-const EXP_EAE_SUPPORT = process.env.EXP_EAE_SUPPORT || "false"
-const EXP_EAE_EXECUTABLE = process.env.EXP_EAE_EXECUTABLE || ""
+const EAE_SUPPORT = process.env.EAE_SUPPORT || "true"
+const EAE_EXECUTABLE = process.env.EAE_EXECUTABLE || ""
 // hwaccel decoder: https://trac.ffmpeg.org/wiki/HWAccelIntro
 const FFMPEG_HWACCEL = process.env.FFMPEG_HWACCEL || false
+
+// Settings debug info
+console.log(`EAE_SUPPORT => ${EAE_SUPPORT}`)
+console.log(`EAE_EXECUTABLE => ${EAE_EXECUTABLE}`)
+console.log(`FFMPEG_HWACCEL => ${FFMPEG_HWACCEL}`)
 
 var app = require('express')();
 var server = require('http').createServer(app);
@@ -98,28 +103,28 @@ socket.on('worker.task.request', taskRequest => {
             }
         }
 
-        if (EXP_EAE_SUPPORT == "true" && EXP_EAE_EXECUTABLE != "") {
+        if (EAE_SUPPORT == "true" && EAE_EXECUTABLE != "") {
             if (!fs.existsSync(processedEnvironmentVariables.EAE_ROOT)){
-                console.log(`Experimental EAE Support - Creating EAE_ROOT destination`)
+                console.log(`EAE Support - Creating EAE_ROOT destination`)
                 fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });
             }
 
-            console.log(`Experimental EAE Support - Spawning EasyAudioEncoder from "${EXP_EAE_EXECUTABLE}", cwd => ${processedEnvironmentVariables.EAE_ROOT}`)
-            childEAE = spawn(EXP_EAE_EXECUTABLE, [], {
+            console.log(`EAE Support - Spawning EasyAudioEncoder from "${EAE_EXECUTABLE}", cwd => ${processedEnvironmentVariables.EAE_ROOT}`)
+            childEAE = spawn(EAE_EXECUTABLE, [], {
                 cwd: processedEnvironmentVariables.EAE_ROOT,
                 env: processedEnvironmentVariables
             });
             childEAE.stdout.pipe(process.stdout);
             childEAE.stderr.pipe(process.stderr);
             childEAE.on('error', (err) => {
-                console.error('Experimental EAE Support - EAE failed:')
+                console.error('EAE Support - EAE failed:')
                 console.error(err)
             })
             childEAE.on('close', () => {
-                console.log('Experimental EAE Support - Closing')
+                console.log('EAE Support - Closing')
             })
             childEAE.on('exit', () => {
-                console.log('Experimental EAE Support - Exiting')
+                console.log('EAE Support - Exiting')
             })       
         } else {
             childEAE = null

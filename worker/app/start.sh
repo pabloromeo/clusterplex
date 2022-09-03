@@ -5,11 +5,13 @@ cd /usr/lib/plexmediaserver
 CLUSTERPLEX_PLEX_VERSION=$(strings "pms_original" | grep -P '^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)-[0-9a-f]{9}')
 CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Transcoder" | grep -Po '[0-9a-f]{7}-[0-9]{4}$')
 CLUSTERPLEX_PLEX_EAE_VERSION=$(printf "eae-`strings "pms_original" | grep -P '^EasyAudioEncoder-eae-[0-9a-f]{7}-$' | cut -d- -f3`-42")
+EAE_VERSION=1785 # fixed for now
 
 echo "CLUSTERPLEX_PLEX_VERSION => '${CLUSTERPLEX_PLEX_VERSION}'"
 echo "CLUSTERPLEX_PLEX_CODECS_VERSION => '${CLUSTERPLEX_PLEX_CODECS_VERSION}'"
-echo "CLUSTERPLEX_PLEX_EAE_VERSION => '${CLUSTERPLEX_PLEX_EAE_VERSION}'"
+echo "CLUSTERPLEX_PLEX_EAE_VERSION (extracted) => '${CLUSTERPLEX_PLEX_EAE_VERSION}'"
 echo "PLEX_ARCH => '${PLEX_ARCH}'"
+echo "EAE_VERSION => '${EAE_VERSION}'"
 
 CLUSTERPLEX_PLEX_CODEC_ARCH="${PLEX_ARCH}"
 INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL=""
@@ -37,10 +39,10 @@ echo "Codec location => ${CODEC_PATH}"
 mkdir -p ${CODEC_PATH}
 cd ${CODEC_PATH}
 
-if [ "$EXP_EAE_SUPPORT" == "true" ]
+if [ "$EAE_SUPPORT" == "false" ]
 then
-  EAE_VERSION=1785 # fixed for now
-
+  echo "EAE_SUPPORT is turned off => ${EAE_SUPPORT}, skipping EasyAudioEncoder download"
+else
   if [ -d "${CODEC_PATH}/EasyAudioEncoder" ]
   then
     echo "EasyAudioEncoder already present"
@@ -81,7 +83,7 @@ done
 
 export FFMPEG_EXTERNAL_LIBS="${CODEC_PATH}/"
 export PLEX_MEDIA_SERVER_INFO_MODEL="${INTERNAL_PLEX_MEDIA_SERVER_INFO_MODEL}"
-export EXP_EAE_EXECUTABLE="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/EasyAudioEncoder"
+export EAE_EXECUTABLE="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/EasyAudioEncoder"
 
 cd /app
 
