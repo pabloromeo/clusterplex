@@ -98,7 +98,7 @@ socket.on('worker.task.request', taskRequest => {
             }
         }
 
-        if (EXP_EAE_SUPPORT == "true") {
+        if (EXP_EAE_SUPPORT == "true" && EXP_EAE_EXECUTABLE != "") {
             if (!fs.existsSync(processedEnvironmentVariables.EAE_ROOT)){
                 console.log(`Experimental EAE Support - Creating EAE_ROOT destination`)
                 fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });
