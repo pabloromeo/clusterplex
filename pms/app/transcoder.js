@@ -2,7 +2,13 @@ const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_LOCAL_NAME = process.env.TRANSCODER_LOCAL_NAME || 'originalTranscoder'
-const PMS_IP = process.env.PMS_IP || '127.0.0.1'
+const PMS_SERVICE = process.env.PMS_SERVICE || ""
+const PMS_IP = process.env.PMS_IP || ""
+const PMS_PORT = process.env.PMS_PORT || "32400"
+
+const LOCAL_RELAY_ENABLED = process.env.LOCAL_RELAY_ENABLED || "1"
+const LOCAL_RELAY_PORT = process.env.LOCAL_RELAY_PORT || "32499"
+
 const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 // Operating mode:
 // local
@@ -11,6 +17,19 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || '0'
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || 'both'
 const TRANSCODE_EAE_LOCALLY = process.env.TRANSCODE_EAE_LOCALLY || false
 const FORCE_HTTPS = process.env.FORCE_HTTPS || "0"
+
+// validations
+if (PMS_SERVICE == "" && PMS_IP == "") {
+    console.error("You must set either PMS_SERVICE or PMS_IP (either one), pointing to you Plex instance. PMS_SERVICE is only allowed in conjunction with LOCAL_RELAY_ENABLED='1'")
+    process.exit(1)
+}
+if (PMS_SERVICE != "" && LOCAL_RELAY_ENABLED != "1") {
+    console.error("PMS_SERVICE is only allowed in conjunction with LOCAL_RELAY_ENABLED='1'. This is due to a high chance of Plex rejecting the traffic coming from the Worker.")
+    process.exit(1)
+}
+if (FORCE_HTTPS == "1" && LOCAL_RELAY_ENABLED == "1") {
+    console.warn(`When Local Relay is enabled FORCE_HTTPS is ignored as it is not needed for reporting streaming progress back to Plex.`)
+}
 
 const { spawn } = require('child_process');
 var ON_DEATH = require('death')({debug: true})
@@ -31,15 +50,21 @@ if (TRANSCODE_OPERATING_MODE == 'local') {
     }
 
     let networkProtocol = "http";
-    if (FORCE_HTTPS == '1') {
-        console.log('Forcing HTTPS in progress callback');
-        networkProtocol = "https";
+    let targetLocation = PMS_SERVICE || PMS_IP    //SERVICE takes precedence over IP
+    let targetPort = PMS_PORT
+    if (LOCAL_RELAY_ENABLED == "1") {
+        console.log(`Local Relay enabled, traffic proxied through PMS local port ${LOCAL_RELAY_PORT}`)
+        targetPort = LOCAL_RELAY_PORT
+    } else {
+        if (FORCE_HTTPS == '1') {
+            console.log('Forcing HTTPS in progress callback');
+            networkProtocol = "https";
+        }    
     }
 
     let newArgs = process.argv.slice(2).map((v) => {
         return v
-            .replace('http://127.0.0.1:', `${networkProtocol}://${PMS_IP}:`)
-            .replace('https://127.0.0.1:', `https://${PMS_IP}:`)
+            .replace(`http://127.0.0.1:${PMS_PORT}`, `${networkProtocol}://${targetLocation}:${targetPort}`)
             .replace('aac_lc', 'aac');  // workaround for error -> Unknown decoder 'aac_lc'
     })
 

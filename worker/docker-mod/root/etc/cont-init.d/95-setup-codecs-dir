@@ -5,7 +5,9 @@ if [ -d "/codecs" ]
 then
     echo "Directory already present"
 else
-    echo "Creating /codecs and changing ownership"
-    mkdir -p /codecs 
-    chown abc:abc /codecs
+    echo "Creating /codecs"
+    mkdir -p /codecs
 fi
+
+echo "**** Changing ownership for /codecs ****"
+chown abc:abc /codecs

@@ -1,0 +1,398 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: clusterplex-pms-config
+  labels:
+    app.kubernetes.io/name: clusterplex-pms-config
+    app.kubernetes.io/part-of: clusterplex
+data:
+  VERSION: docker
+  TZ: America/Argentina/Buenos_Aires
+  PGID: '1000'
+  PUID: '1000'
+  DOCKER_MODS: 'ghcr.io/pabloromeo/clusterplex_dockermod:latest'
+  ORCHESTRATOR_URL: 'http://clusterplex-orchestrator:3500'
+  PMS_SERVICE: "clusterplex-pms"
+  PMS_PORT: "32400"
+  TRANSCODER_VERBOSE: '1'
+  TRANSCODE_OPERATING_MODE: both
+  LOCAL_RELAY_ENABLED: '1'
+  LOCAL_RELAY_PORT: "32499"
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: clusterplex-orchestrator-config
+  labels:
+    app.kubernetes.io/name: clusterplex-orchestrator-config
+    app.kubernetes.io/part-of: clusterplex
+data:
+  TZ: America/Argentina/Buenos_Aires
+  LISTENING_PORT: '3500'
+  WORKER_SELECTION_STRATEGY: LOAD_TASKS
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: clusterplex-worker-config
+  labels:
+    app.kubernetes.io/name: clusterplex-worker-config
+    app.kubernetes.io/part-of: clusterplex
+data:
+  TZ: America/Argentina/Buenos_Aires
+  PGID: '1000'
+  PUID: '1000'
+  VERSION: docker
+  DOCKER_MODS: 'ghcr.io/pabloromeo/clusterplex_worker_dockermod:latest'
+  ORCHESTRATOR_URL: 'http://clusterplex-orchestrator:3500'
+  LISTENING_PORT: '3501'
+  STAT_CPU_INTERVAL: '10000'
+  EAE_SUPPORT: '1'
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clusterplex-config-pvc
+  labels:
+    app.kubernetes.io/name: clusterplex-config-pvc
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: "10Gi"
+  # specify your storage class
+  #storageClassName: longhorn
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clusterplex-transcode-pvc
+  labels:
+    app.kubernetes.io/name: clusterplex-transcode-pvc
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: "10Gi"
+  # specify your storage class
+  #storageClassName: longhorn
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: clusterplex-media
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 1000Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+    - ReadWriteMany
+  storageClassName: ""
+  nfs:
+    path: /YourPath     # The path to your media
+    server: 0.0.0.0     # Your NFS server with Media
+  mountOptions:
+    - vers=4
+    - minorversion=1
+    - noac
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clusterplex-media-pvc
+spec:
+  volumeName: clusterplex-media
+  storageClassName: ""
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusterplex-pms
+  labels:
+    app.kubernetes.io/name: clusterplex-pms
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusterplex-pms
+      app.kubernetes.io/part-of: clusterplex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusterplex-pms
+        app.kubernetes.io/part-of: clusterplex
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: clusterplex-worker
+              topologyKey: kubernetes.io/hostname
+            weight: 50
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: clusterplex-pms
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      containers:
+      - name: plex
+        image: lscr.io/linuxserver/plex:latest
+        startupProbe:
+          httpGet:
+            path: /identity
+            scheme: HTTPS
+            port: 32400
+          failureThreshold: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /identity
+            scheme: HTTPS
+            port: 32400
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /identity
+            scheme: HTTPS
+            port: 32400
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        ports:
+          - name: pms
+            containerPort: 32400
+          - name: relay
+            containerPort: 32499
+        envFrom:
+        - configMapRef:
+            name: clusterplex-pms-config
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: config
+          mountPath: /config
+        - name: transcode
+          mountPath: /transcode
+        resources:          # adapt requests and limits to your needs
+          requests:
+            cpu: 300m
+            memory: 256Mi
+          limits:
+            cpu: 2000m
+            memory: 512Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: "clusterplex-media-pvc"
+      - name: config
+        persistentVolumeClaim:
+          claimName: "clusterplex-config-pvc"
+      - name: transcode
+        persistentVolumeClaim:
+          claimName: "clusterplex-transcode-pvc"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clusterplex-pms
+  labels:
+    app.kubernetes.io/name: clusterplex-pms
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  type: ClusterIP
+  ports:
+    - name: pms
+      port: 32400
+      protocol: TCP
+      targetPort: pms
+    - name: relay
+      port: 32499
+      protocol: TCP
+      targetPort: relay
+  selector:
+    app.kubernetes.io/name: clusterplex-pms
+    app.kubernetes.io/part-of: clusterplex
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusterplex-orchestrator
+  labels:
+    app.kubernetes.io/name: clusterplex-orchestrator
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusterplex-orchestrator
+      app.kubernetes.io/part-of: clusterplex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusterplex-orchestrator
+        app.kubernetes.io/part-of: clusterplex
+    spec:
+      containers:
+      - name: plex
+        image: ghcr.io/pabloromeo/clusterplex_orchestrator:latest
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 3500
+          failureThreshold: 3
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3500
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3500
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+        ports:
+          - name: orchestrator
+            containerPort: 3500
+        envFrom:
+        - configMapRef:
+            name: clusterplex-orchestrator-config
+        resources:            # adapt requests and limits to your needs
+          requests:
+            cpu: 200m
+            memory: 32Mi
+          limits:
+            cpu: 500m
+            memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clusterplex-orchestrator
+  labels:
+    app.kubernetes.io/name: clusterplex-orchestrator
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  type: ClusterIP
+  ports:
+    - name: orchestrator
+      port: 3500
+      protocol: TCP
+      targetPort: orchestrator
+  selector:
+    app.kubernetes.io/name: clusterplex-orchestrator
+    app.kubernetes.io/part-of: clusterplex
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clusterplex-worker
+  labels:
+    app.kubernetes.io/name: clusterplex-worker
+    app.kubernetes.io/part-of: clusterplex
+spec:
+  serviceName: clusterplex-worker-service
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusterplex-worker
+      app.kubernetes.io/part-of: clusterplex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusterplex-worker
+        app.kubernetes.io/part-of: clusterplex
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: clusterplex-worker
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  name: clusterplex-pms
+              topologyKey: kubernetes.io/hostname
+            weight: 50
+      containers:
+      - name: plex-worker
+        image: lscr.io/linuxserver/plex:latest
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 3501
+          failureThreshold: 40
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3501
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3501
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        ports:
+          - name: worker
+            containerPort: 3501
+        envFrom:
+        - configMapRef:
+            name: clusterplex-worker-config
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: codecs
+          mountPath: /codecs
+        - name: transcode
+          mountPath: /transcode
+        resources:              # adapt requests and limits to your needs
+          requests:
+            cpu: 500m
+            memory: 200Mi
+          limits:
+            cpu: 3000m
+            memory: 800Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: "clusterplex-media-pvc"
+      - name: transcode
+        persistentVolumeClaim:
+          claimName: "clusterplex-transcode-pvc"
+  volumeClaimTemplates:
+    - metadata:
+        name: codecs
+        labels:
+          app.kubernetes.io/name: clusterplex-codecs-pvc
+          app.kubernetes.io/part-of: clusterplex
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+        # specify your storage class
+        #storageClassName: longhorn

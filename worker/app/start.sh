@@ -39,7 +39,7 @@ echo "Codec location => ${CODEC_PATH}"
 mkdir -p ${CODEC_PATH}
 cd ${CODEC_PATH}
 
-if [ "$EAE_SUPPORT" == "false" ]
+if [ "$EAE_SUPPORT" == "0" ] || [ "$EAE_SUPPORT" == "false" ]
 then
   echo "EAE_SUPPORT is turned off => ${EAE_SUPPORT}, skipping EasyAudioEncoder download"
 else
