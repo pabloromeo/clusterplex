@@ -4,7 +4,7 @@ const STAT_CPU_OPS_DURATION = process.env.STAT_CPU_OPS_DURATION || 1000
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500'
 const TRANSCODER_PATH = process.env.TRANSCODER_PATH || '/usr/lib/plexmediaserver/'
 const TRANSCODER_NAME = process.env.TRANSCODER_NAME || 'Plex Transcoder'
-const EAE_SUPPORT = process.env.EAE_SUPPORT || "true"
+const EAE_SUPPORT = process.env.EAE_SUPPORT || "1"
 const EAE_EXECUTABLE = process.env.EAE_EXECUTABLE || ""
 // hwaccel decoder: https://trac.ffmpeg.org/wiki/HWAccelIntro
 const FFMPEG_HWACCEL = process.env.FFMPEG_HWACCEL || false
@@ -103,7 +103,7 @@ socket.on('worker.task.request', taskRequest => {
             }
         }
 
-        if (EAE_SUPPORT == "true" && EAE_EXECUTABLE != "") {
+        if ((EAE_SUPPORT == "1" || EAE_SUPPORT == "true") && EAE_EXECUTABLE != "") {
             if (!fs.existsSync(processedEnvironmentVariables.EAE_ROOT)){
                 console.log(`EAE Support - Creating EAE_ROOT destination`)
                 fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });

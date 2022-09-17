@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+#/etc/init.d/nginx start
+/usr/sbin/nginx -g 'daemon off;'
