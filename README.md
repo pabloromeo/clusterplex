@@ -12,9 +12,6 @@ It has been tested on Kubernetes and Docker Swarm.
 
 ![Docker Swarm](docs/images/docker-swarm-logo-small.png)
 
-Plex organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices.
-
-![plex](docs/images/plex-logo.png)
 
 ## Components
 
@@ -32,6 +29,8 @@ It's made up of 3 parts:
   2. Custom Docker image: ghcr.io/pabloromeo/clusterplex_worker:latest
 
 ## How does it work?
+
+![Overview](docs/images/overview.png)
 
 * In the customized PMS server, Plex’s own transcoder is renamed and a shim is put in its place which calls a small Node.js app that communicates with the Orchestrator container over websockets.
 Also, a Local Relay is installed (an NGINX forward-proxy) which forwards calls coming from Workers to PMS as if they were made locally.
