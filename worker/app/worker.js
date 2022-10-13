@@ -103,9 +103,9 @@ socket.on('worker.task.request', taskRequest => {
             }
         }
 
-        if ((EAE_SUPPORT == "1" || EAE_SUPPORT == "true") && EAE_EXECUTABLE != "") {
+        if ((EAE_SUPPORT == "1" || EAE_SUPPORT == "true") && EAE_EXECUTABLE != "" && processedEnvironmentVariables.EAE_ROOT !== undefined) {
             if (!fs.existsSync(processedEnvironmentVariables.EAE_ROOT)){
-                console.log(`EAE Support - Creating EAE_ROOT destination`)
+                console.log(`EAE Support - Creating EAE_ROOT destination => ${processedEnvironmentVariables.EAE_ROOT}`)
                 fs.mkdirSync(processedEnvironmentVariables.EAE_ROOT, { recursive: true });
             }
 
