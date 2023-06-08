@@ -221,14 +221,14 @@ pms:
   resources:
     requests:
       # -- CPU Request amount
-      cpu: 2
+      cpu: 2000m
 
       # Memory Request Amount
       memory: 2Gi
 
     limits:
       # -- CPU Limit amount
-      cpu: 4
+      cpu: 4000m
 
       # -- Memory Limit amount
       memory: 4Gi
@@ -295,6 +295,35 @@ orchestrator:
 
     # -- Provide additional labels which may be required.
     labels: {}
+
+  # -- Configure a ServiceMonitor for use with Prometheus monitoring
+  # @default -- See below
+  prometheusServiceMonitor:
+    # -- Enable the ServiceMonitor creation
+    enabled: false
+
+    # -- Provide additional additions which may be required.
+    annotations: {}
+
+    # -- Provide additional labels which may be required.
+    labels: {}
+
+    # -- Provide a custom selector if desired. Note that this will take precedent over the default
+    # method of using the orchestrators namespace. This usually should not be required.
+    customSelector: {}
+
+    # -- Configure how often Prometheus should scrape this metrics endpoint in seconds
+    scrapeInterval: 30s
+
+    # -- Configure how long Prometheus should wait for the endpoint to reply before
+    # considering the request to have timed out.
+    scrapeTimeout: 10s
+
+  # -- Configures if the Grafana dashboard for the orchestrator component is deployed to the cluster or not.
+  # If enabled, this creates a ConfigMap containing the dashboard JSON so that your Gradana instance can detect it.
+  # This requires your grafana instance to have the grafana.sidecar.dashboards.enabled to be true and the searchNamespace
+  # to be set to ALL otherwise this will not be discovered.
+  enableGrafanaDashboard: false
 
   # -- Configure the resource requests and limits for the orchestrator component
   # @default -- See below

@@ -12,6 +12,14 @@ configMaps:
       TZ: '{{ .Values.global.timezone | default "America/Chicago" }}'
       LISTENING_PORT: '{{ .Values.orchestrator.config.port | default "3500" }}'
       WORKER_SELECTION_STRATEGY: '{{ .Values.orchestrator.config.workerSelectionStrategy | default "LOAD_RANK" }}'
+  {{ if .Values.orchestrator.enableGrafanaDashboard }}
+  grafana-dashboard:
+    enabled: true
+    labels:
+      grafana_dashboard: "1"
+    data:
+      {{ (.Files.Glob "files/orchestrator-grafana-dashboard.json").AsConfig | nindent 6 }}
+  {{- end }}
 
 envFrom:
   - configMapRef:
@@ -31,6 +39,23 @@ service:
         primary: true
         port: '{{ .Values.orchestrator.config.port | default "3500" }}'
         protocol: TCP
+
+serviceMonitor:
+  main:
+    enabled: '{{ .Values.orchestrator.prometheusServiceMonitor.enabled | default "false" }}'
+    annotations:
+      {{- toYaml .Values.orchestrator.prometheusServiceMonitor.annotations | nindent 6 }}
+    labels:
+      {{- toYaml .Values.orchestrator.prometheusServiceMonitor.labels | nindent 6 }}
+    selector:
+      {{- toYaml .Values.orchestrator.prometheusServiceMonitor.customSelector | nindent 6 }}
+    serviceName: {{ .Release.Name }}-orchestrator
+    endpoints:
+      - port: http
+        scheme: http
+        path: /metrics
+        interval: '{{ .Values.orchestrator.prometheusServiceMonitor.scrapeInterval | default "30s" }}'
+        scrapeTimeout: '{{ .Values.orchestrator.prometheusServiceMonitor.scrapeTimeout | default "10s" }}'
 
 probes:
   startup:

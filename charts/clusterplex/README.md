@@ -95,8 +95,8 @@ $ helm install clusterplex clusterplex/clusterplex
 | pms.configVolume.size | string | `"25Gi"` | The amount of storage that is requested for the persistent volume. |
 | pms.configVolume.retain | bool | `true` | Set to true to retain the PVC upon `helm uninstall` |
 | pms.resources | object | See below | Configure the resource requests and limits for the PMS component |
-| pms.resources.requests.cpu | int | `2` | CPU Request amount |
-| pms.resources.limits.cpu | int | `4` | CPU Limit amount |
+| pms.resources.requests.cpu | string | `"2000m"` | CPU Request amount |
+| pms.resources.limits.cpu | string | `"4000m"` | CPU Limit amount |
 | pms.resources.limits.memory | string | `"4Gi"` | Memory Limit amount |
 | orchestrator | object | See below | Configure the orchestrator component |
 | orchestrator.enabled | bool | `true` | Enable or disable the Orchestrator component |
@@ -111,6 +111,14 @@ $ helm install clusterplex clusterplex/clusterplex
 | orchestrator.serviceConfig.externalTrafficPolicy | string | `nil` | Specify the externalTrafficPolicy for the service. Options: Cluster, Local [[ref](https://kubernetes.io/docs/tutorials/services/source-ip/)] |
 | orchestrator.serviceConfig.annotations | object | `{}` | Provide additional annotations which may be required. |
 | orchestrator.serviceConfig.labels | object | `{}` | Provide additional labels which may be required. |
+| orchestrator.prometheusServiceMonitor | object | See below | Configure a ServiceMonitor for use with Prometheus monitoring |
+| orchestrator.prometheusServiceMonitor.enabled | bool | `false` | Enable the ServiceMonitor creation |
+| orchestrator.prometheusServiceMonitor.annotations | object | `{}` | Provide additional additions which may be required. |
+| orchestrator.prometheusServiceMonitor.labels | object | `{}` | Provide additional labels which may be required. |
+| orchestrator.prometheusServiceMonitor.customSelector | object | `{}` | Provide a custom selector if desired. Note that this will take precedent over the default method of using the orchestrators namespace. This usually should not be required. |
+| orchestrator.prometheusServiceMonitor.scrapeInterval | string | `"30s"` | Configure how often Prometheus should scrape this metrics endpoint in seconds |
+| orchestrator.prometheusServiceMonitor.scrapeTimeout | string | `"10s"` | Configure how long Prometheus should wait for the endpoint to reply before considering the request to have timed out. |
+| orchestrator.enableGrafanaDashboard | bool | `false` | Configures if the Grafana dashboard for the orchestrator component is deployed to the cluster or not. If enabled, this creates a ConfigMap containing the dashboard JSON so that your Gradana instance can detect it. This requires your grafana instance to have the grafana.sidecar.dashboards.enabled to be true and the searchNamespace to be set to ALL otherwise this will not be discovered. |
 | orchestrator.resources | object | See below | Configure the resource requests and limits for the orchestrator component |
 | orchestrator.resources.requests.cpu | string | `"200m"` | CPU Request amount |
 | orchestrator.resources.limits.cpu | string | `"500m"` | CPU Limit amount |
