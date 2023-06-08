@@ -94,6 +94,10 @@ $ helm install clusterplex clusterplex/clusterplex
 | pms.configVolume.accessMode | string | `"ReadWriteOnce"` | AccessMode for the persistent volume. Make sure to select an access mode that is supported by your storage provider! [[ref]](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) |
 | pms.configVolume.size | string | `"25Gi"` | The amount of storage that is requested for the persistent volume. |
 | pms.configVolume.retain | bool | `true` | Set to true to retain the PVC upon `helm uninstall` |
+| pms.healthProbes | object | See below | Enable or disable the various health check probes for this component |
+| pms.healthProbes.startup | bool | `true` | Enable or disable the startup probe |
+| pms.healthProbes.readiness | bool | `true` | Enable or disable the readiness probe |
+| pms.healthProbes.liveness | bool | `true` | Enable or disable the liveness probe |
 | pms.resources | object | See below | Configure the resource requests and limits for the PMS component |
 | pms.resources.requests.cpu | string | `"2000m"` | CPU Request amount |
 | pms.resources.limits.cpu | string | `"4000m"` | CPU Limit amount |
@@ -119,6 +123,10 @@ $ helm install clusterplex clusterplex/clusterplex
 | orchestrator.prometheusServiceMonitor.scrapeInterval | string | `"30s"` | Configure how often Prometheus should scrape this metrics endpoint in seconds |
 | orchestrator.prometheusServiceMonitor.scrapeTimeout | string | `"10s"` | Configure how long Prometheus should wait for the endpoint to reply before considering the request to have timed out. |
 | orchestrator.enableGrafanaDashboard | bool | `false` | Configures if the Grafana dashboard for the orchestrator component is deployed to the cluster or not. If enabled, this creates a ConfigMap containing the dashboard JSON so that your Gradana instance can detect it. This requires your grafana instance to have the grafana.sidecar.dashboards.enabled to be true and the searchNamespace to be set to ALL otherwise this will not be discovered. |
+| orchestrator.healthProbes | object | See below | Enable or disable the various health check probes for this component |
+| orchestrator.healthProbes.startup | bool | `true` | Enable or disable the startup probe |
+| orchestrator.healthProbes.readiness | bool | `true` | Enable or disable the readiness probe |
+| orchestrator.healthProbes.liveness | bool | `true` | Enable or disable the liveness probe |
 | orchestrator.resources | object | See below | Configure the resource requests and limits for the orchestrator component |
 | orchestrator.resources.requests.cpu | string | `"200m"` | CPU Request amount |
 | orchestrator.resources.limits.cpu | string | `"500m"` | CPU Limit amount |
@@ -142,6 +150,10 @@ $ helm install clusterplex clusterplex/clusterplex
 | worker.codecVolumes.accessMode | string | `"ReadWriteOnce"` | AccessMode for the persistent volume. Make sure to select an access mode that is supported by your storage provider! [[ref]](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) |
 | worker.codecVolumes.size | string | `"1Gi"` | The size of the volume |
 | worker.codecVolumes.storageClass | string | `nil` | Storage Class for the codec volumes If set to `-`, dynamic provisioning is disabled. If set to something else, the given storageClass is used. If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner. |
+| worker.healthProbes | object | See below | Enable or disable the various health check probes for this component |
+| worker.healthProbes.startup | bool | `true` | Enable or disable the startup probe |
+| worker.healthProbes.readiness | bool | `true` | Enable or disable the readiness probe |
+| worker.healthProbes.liveness | bool | `true` | Enable or disable the liveness probe |
 | worker.resources | object | See below | Configure the resource requests and limits for the worker component |
 | worker.resources.requests.cpu | string | `"2000m"` | CPU Request amount |
 | worker.resources.requests.memory | string | `"3Gi"` | Memory Request Amount |

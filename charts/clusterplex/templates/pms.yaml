@@ -104,8 +104,9 @@ persistence:
 {{- end }}
 
 probes:
+  {{ if .Values.pms.healthProbes.startup }}
   startup:
-    enabled: false
+    enabled: true
     custom: true
     spec:
       httpGet:
@@ -114,6 +115,11 @@ probes:
         port: plex
       periodSeconds: 10
       failureThreshold: 30
+  {{ else }}
+  startup:
+    enabled: false
+  {{- end }}
+  {{ if .Values.pms.healthProbes.readiness }}
   readiness:
     enabled: true
     custom: true
@@ -127,6 +133,11 @@ probes:
       periodSeconds: 10
       successThreshold: 1
       failureThreshold: 30
+  {{ else }}
+  readiness:
+    enabled: false
+  {{- end }}
+  {{ if .Values.pms.healthProbes.liveness }}
   liveness:
     enabled: true
     custom: true
@@ -139,7 +150,11 @@ probes:
       timeoutSeconds: 5
       periodSeconds: 10
       successThreshold: 1
-      failureThreshold: 3
+      failureThreshold: 6
+  {{ else }}
+  liveness:
+    enabled: false
+  {{- end }}
 {{- end }}
 
 {{ if .Values.pms.enabled }}

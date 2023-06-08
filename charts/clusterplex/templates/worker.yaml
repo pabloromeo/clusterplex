@@ -99,6 +99,7 @@ volumeClaimTemplates:
 {{- end }}
 
 probes:
+  {{ if .Values.worker.healthProbes.startup }}
   startup:
     enabled: false
     custom: true
@@ -109,6 +110,11 @@ probes:
         port: http
       periodSeconds: 10
       failureThreshold: 40
+  {{ else }}
+  startup:
+    enabled: false
+  {{- end }}
+  {{ if .Values.worker.healthProbes.readiness }}
   readiness:
     enabled: true
     custom: true
@@ -122,6 +128,11 @@ probes:
       periodSeconds: 10
       successThreshold: 1
       failureThreshold: 15
+  {{ else }}
+  readiness:
+    enabled: false
+  {{- end }}
+  {{ if .Values.worker.healthProbes.liveness }}
   liveness:
     enabled: true
     custom: true
@@ -135,6 +146,10 @@ probes:
       periodSeconds: 10
       successThreshold: 1
       failureThreshold: 3
+  {{ else }}
+  liveness:
+    enabled: false
+  {{- end }}
 {{- end }}
 
 {{ if .Values.worker.enabled }}

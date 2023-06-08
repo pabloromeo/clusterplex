@@ -216,6 +216,18 @@ pms:
     # -- Set to true to retain the PVC upon `helm uninstall`
     retain: true
 
+  # -- Enable or disable the various health check probes for this component
+  # @default -- See below
+  healthProbes:
+    # -- Enable or disable the startup probe
+    startup: true
+
+    # -- Enable or disable the readiness probe
+    readiness: true
+
+    # -- Enable or disable the liveness probe
+    liveness: true
+
   # -- Configure the resource requests and limits for the PMS component
   # @default -- See below
   resources:
@@ -325,6 +337,18 @@ orchestrator:
   # to be set to ALL otherwise this will not be discovered.
   enableGrafanaDashboard: false
 
+  # -- Enable or disable the various health check probes for this component
+  # @default -- See below
+  healthProbes:
+    # -- Enable or disable the startup probe
+    startup: true
+
+    # -- Enable or disable the readiness probe
+    readiness: true
+
+    # -- Enable or disable the liveness probe
+    liveness: true
+
   # -- Configure the resource requests and limits for the orchestrator component
   # @default -- See below
   resources:
@@ -427,6 +451,18 @@ worker:
     # If set to something else, the given storageClass is used.
     # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
     storageClass:
+
+  # -- Enable or disable the various health check probes for this component
+  # @default -- See below
+  healthProbes:
+    # -- Enable or disable the startup probe
+    startup: true
+
+    # -- Enable or disable the readiness probe
+    readiness: true
+
+    # -- Enable or disable the liveness probe
+    liveness: true
 
   # -- Configure the resource requests and limits for the worker component
   # @default -- See below
