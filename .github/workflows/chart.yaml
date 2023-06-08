@@ -1,0 +1,74 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: "src"
+          fetch-depth: 0
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v3
+        with:
+          path: "dest"
+          ref: "gh-pages"
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 3.12.0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Helm Docs
+        run: |
+          cd /tmp
+          wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
+          tar -xvf helm-docs_1.11.0_Linux_x86_64.tar.gz
+          sudo mv helm-docs /usr/local/sbin
+
+      - name: Generate Helm Docs
+        shell: bash
+        run: |
+          helm-docs --chart-search-root=src/charts/clusterplex --sort-values-order=file
+          cp -f src/charts/clusterplex/README.md dest/README.md
+
+      - name: Package Helm Chart
+        shell: bash
+        run: |
+          helm package src/charts/clusterplex --dependency-update --destination dest/
+
+      - name: Update Chart Index
+        shell: bash
+        working-directory: dest
+        run: |
+          helm repo index . --url https://pabloromeo.github.io/clusterplex
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        id: auto-commit
+        with:
+          repository: dest
+          branch: gh-pages
+          file_pattern: "index.yaml *.tgz *.md"
+
+      - name: Wait for deploy
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        if: ${{ steps.auto-commit.outputs.changes_detected }}
+        id: wait-for-deploy
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ steps.auto-commit.outputs.commit_hash }}
+          checkName: deploy
