@@ -74,7 +74,7 @@ Workers require a path to store downloaded codecs for the particular architectur
 Codecs are downloaded when the worker container starts up.
 
 The path within the container is **/codecs**, which you can mount to a volume in order to have them persisted across container recreations. Subdirectories for each plex version and architecture are created within it.
- 
+
 ## Network settings in PMS ##
 Latest versions of ClusterPlex don't require any special network configuration, due to the new **Local Relay** functionality which forwards calls from Workers to Plex, which is enabled by default.
 
@@ -91,3 +91,4 @@ See the [docs](docs/) section for details on each component's configuration para
 * [On Kubernetes](docs/kubernetes/)
 * [On Docker Swarm](docs/docker-swarm/)
 * [Grafana Dashboard and Metrics](docs/grafana-dashboard/)
+* [On Kubernetes via Helm](https://pabloromeo.github.io/clusterplex)

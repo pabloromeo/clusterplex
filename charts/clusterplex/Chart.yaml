@@ -1,0 +1,16 @@
+apiVersion: v2
+name: clusterplex
+description: ClusterPlex is basically an extended version of Plex, which supports distributed Workers across a cluster to handle transcoding requests.
+type: application
+kubeVersion: ">=1.24.0-0"
+dependencies:
+  - name: common
+    repository: https://bjw-s.github.io/helm-charts
+    version: 1.5.1
+home: https://github.com/pabloromeo/clusterplex/charts/clusterplex
+sources:
+  - https://github.com/pabloromeo/clusterplex
+  - https://github.com/linuxserver/docker-plex
+  - https://plex.tv
+version: 1.0.0
+appVersion: 1.4.4

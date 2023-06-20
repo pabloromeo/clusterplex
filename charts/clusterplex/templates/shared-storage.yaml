@@ -1,0 +1,29 @@
+{{- define "clusterplex.sharedStorage.hardcodedValues" -}}
+global:
+  nameOverride: "{{ .Release.Name }}"
+
+controller:
+  enabled: false
+service:
+  main:
+    enabled: false
+
+persistence:
+  transcode:
+    {{- toYaml .Values.global.sharedStorage.transcode | nindent 4 }}
+    accessMode: ReadWriteMany
+  media:
+    {{- toYaml .Values.global.sharedStorage.media | nindent 4 }}
+    accessMode: ReadWriteMany
+  {{- range $key, $value := .Values.global.sharedStorage.additionalMediaVolumes -}}
+  {{ $key | nindent 2}}:
+    {{- toYaml $value | nindent 4 }}
+    accessMode: "ReadWriteMany"
+  {{- end }}
+{{- end }}
+
+
+{{- $ctx := deepCopy . -}}
+{{- $_ := get .Values "global" | mergeOverwrite $ctx.Values -}}
+{{- $_ = include "clusterplex.sharedStorage.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- include "bjw-s.common.loader.all" $ctx }}

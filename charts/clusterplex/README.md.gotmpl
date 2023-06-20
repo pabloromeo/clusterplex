@@ -1,0 +1,30 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}
+
+<br>
+
+{{ template "chart.sourcesSection" . }}
+
+<br>
+
+{{ template "chart.requirementsSection" . }}
+
+<br>
+
+## Installing the Chart
+
+To install the chart with the release name `clusterplex`:
+
+```console
+$ helm repo add clusterplex http://pabloromeo.github.io/clusterplex
+$ helm install clusterplex clusterplex/clusterplex
+```
+
+<br>
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

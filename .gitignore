@@ -61,3 +61,6 @@ typings/
 .next
 
 docker-compose.yml
+
+# macOS
+**/.DS_STORE

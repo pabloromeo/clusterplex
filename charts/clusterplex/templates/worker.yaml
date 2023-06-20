@@ -1,0 +1,160 @@
+{{- define "clusterplex.worker.hardcodedValues" -}}
+global:
+  nameOverride: "worker"
+
+image:
+  repository: '{{ .Values.global.plexImage.repository }}'
+  tag: '{{ .Values.global.plexImage.tag | default "latest" }}'
+  imagePullPolicy: '{{ .Values.global.plexImage.imagePullPolicy }}'
+
+controller:
+  type: statefulset
+  replicas: '{{ .Values.worker.config.replicas | default 1 }}'
+
+configMaps:
+  config:
+    enabled: true
+    data:
+      TZ: '{{ .Values.global.timezone | default "America/Chicago" }}'
+      PGID: '{{ .Values.global.PGID | default "1000" }}'
+      PUID: '{{ .Values.global.PUID | default "1000" }}'
+      VERSION: docker
+      DOCKER_MODS: 'ghcr.io/pabloromeo/clusterplex_worker_dockermod:{{ .Values.global.clusterplexVersion | default .Chart.AppVersion }}'
+      ORCHESTRATOR_URL: 'http://{{ .Release.Name }}-orchestrator:{{ .Values.orchestrator.config.port | default "3500" }}'
+      LISTENING_PORT: '{{ .Values.worker.config.port | default "3501" }}'
+      STAT_CPU_INTERVAL: '{{ .Values.worker.config.cpuStatInterval | default "10000" }}'
+      EAE_SUPPORT: '{{ .Values.worker.config.eaeSupport | default "1" }}'
+
+envFrom:
+  - configMapRef:
+      name: "{{ .Release.Name }}-worker-config"
+
+
+initContainers:
+  {{ if .Values.global.sharedStorage.transcode.enabled }}
+  set-transcode-permissions:
+    image: busybox:1.36.1
+    command: ['sh', '-c', 'chown -R {{ .Values.global.PUID | default "1000" }}:{{ .Values.global.PGID | default "1000" }} /transcode && chmod 0755 -R /transcode && echo "Configured /transcode permissions"' ]
+    volumeMounts:
+      - name: transcode
+        mountPath: /transcode
+  {{- end }}
+  {{ if .Values.worker.codecVolumes.enabled }}
+  set-codec-permissions:
+    image: busybox:1.36.1
+    command: ['sh', '-c', 'chown -R {{ .Values.global.PUID | default "1000" }}:{{ .Values.global.PGID | default "1000" }} /codecs && chmod 0755 -R /codecs && echo "Configured /codecs permissions"' ]
+    volumeMounts:
+      - name: codecs
+        mountPath: /codecs
+  {{- end }}
+
+service:
+  main:
+    type: '{{ .Values.worker.serviceConfig.type | default "ClusterIP" }}'
+    externalTrafficPolicy: '{{ .Values.worker.serviceConfig.externalTrafficPolicy }}'
+    annotations:
+      {{- toYaml .Values.worker.serviceConfig.annotations | nindent 6 }}
+    labels:
+      {{- toYaml .Values.worker.serviceConfig.labels | nindent 6 }}
+    ports:
+      http:
+        enabled: true
+        primary: true
+        port: '{{ .Values.worker.config.port | default "3501" }}'
+        protocol: TCP
+
+persistence:
+  transcode:
+    {{- toYaml .Values.global.sharedStorage.transcode | nindent 4 }}
+    accessMode: ReadWriteMany
+    {{ if not .Values.global.sharedStorage.transcode.existingClaim }}
+    existingClaim: {{ .Release.Name }}-transcode
+    {{- end }}
+  media:
+    {{- toYaml .Values.global.sharedStorage.media | nindent 4 }}
+    accessMode: ReadWriteMany
+    {{ if not .Values.global.sharedStorage.media.existingClaim }}
+    existingClaim: {{ .Release.Name }}-media
+    {{- end }}
+{{- range $key, $value := .Values.global.sharedStorage.additionalMediaVolumes -}}
+  {{ $key | nindent 2}}:
+    {{- toYaml $value | nindent 4 }}
+    accessMode: "ReadWriteMany"
+    existingClaim: {{ if not $value.existingClaim }}{{ $.Release.Name }}-{{ $key }}{{ else }}{{ $value.existingClaim }}{{ end }}
+{{- end }}
+
+{{ if .Values.worker.codecVolumes.enabled }}
+volumeClaimTemplates:
+  - name: codecs
+    annotations:
+      {{- toYaml .Values.worker.codecVolumes.annotations | nindent 6 }}
+    labels:
+      {{- toYaml .Values.worker.codecVolumes.labels | nindent 6 }}
+    mountPath: /codecs
+    accessMode: '{{ .Values.worker.codecVolumes.accessMode | default "ReadWriteOnce" }}'
+    size: '{{ .Values.worker.codecVolumes.size | default "1Gi" }}'
+    {{ if .Values.worker.codecVolumes.storageClass }}
+    storageClass: {{ if (eq "-" .Values.worker.codecVolumes.storageClass) }}""{{- else }}{{ .Values.worker.codecVolumes.storageClass | quote }}{{- end }}
+    {{- end }}
+{{- end }}
+
+probes:
+  {{ if .Values.worker.healthProbes.startup }}
+  startup:
+    enabled: false
+    custom: true
+    spec:
+      httpGet:
+        scheme: HTTP
+        path: /health
+        port: http
+      periodSeconds: 10
+      failureThreshold: 40
+  {{ else }}
+  startup:
+    enabled: false
+  {{- end }}
+  {{ if .Values.worker.healthProbes.readiness }}
+  readiness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        scheme: HTTP
+        path: /health
+        port: http
+      initialDelaySeconds: 60
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 15
+  {{ else }}
+  readiness:
+    enabled: false
+  {{- end }}
+  {{ if .Values.worker.healthProbes.liveness }}
+  liveness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        scheme: HTTP
+        path: /health
+        port: http
+      initialDelaySeconds: 60
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+  {{ else }}
+  liveness:
+    enabled: false
+  {{- end }}
+{{- end }}
+
+{{ if .Values.worker.enabled }}
+{{- $ctx := deepCopy . -}}
+{{- $_ := get .Values "worker" | mergeOverwrite $ctx.Values -}}
+{{- $_ = include "clusterplex.worker.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- include "bjw-s.common.loader.all" $ctx }}
+{{ end }}
