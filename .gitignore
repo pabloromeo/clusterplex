@@ -60,7 +60,8 @@ typings/
 # next.js build output
 .next
 
-docker-compose.yml
-
 # macOS
 **/.DS_STORE
+
+# for local testing
+sample-content/

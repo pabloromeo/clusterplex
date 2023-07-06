@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  plex:
+    container_name: plex
+    build:
+      context: ./pms
+      dockerfile: ./extended-image/Dockerfile-development
+    environment:
+      VERSION: docker
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      ORCHESTRATOR_URL: http://plex-orchestrator:3500
+      PMS_SERVICE: plex     # This service. If you disable Local Relay then you must use PMS_IP instead
+      PMS_PORT: "32400"
+      TRANSCODE_OPERATING_MODE: both #(local|remote|both)
+      TRANSCODER_VERBOSE: "1"   # 1=verbose, 0=silent
+      LOCAL_RELAY_ENABLED: "1"
+      LOCAL_RELAY_PORT: "32499"
+    healthcheck:
+      test: curl -fsS http://localhost:32400/identity > /dev/null || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - plex-config:/config
+      - transcode-volume:/transcode
+      - ./sample-content/tv:/data/tv
+      - ./sample-content/movies:/data/movies
+    ports:
+      - 32499:32499   # LOCAL_RELAY_PORT
+      - 32400:32400
+      - 3005:3005
+      - 8324:8324
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+
+  plex-orchestrator:
+    container_name: plex-orchestrator
+    build: ./orchestrator
+    healthcheck:
+      test: curl -fsS http://localhost:3500/health > /dev/null || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    environment:
+      TZ: ${TZ}
+      LISTENING_PORT: 3500
+      WORKER_SELECTION_STRATEGY: "LOAD_RANK" # RR | LOAD_CPU | LOAD_TASKS | LOAD_RANK (default)
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 3500:3500
+
+  plex-worker:
+    build:
+      context: ./worker
+      dockerfile: ./extended-image/Dockerfile-development
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      VERSION: docker
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ}
+      LISTENING_PORT: 3501      # used by the healthcheck
+      STAT_CPU_INTERVAL: 2000   # interval for reporting worker load metrics
+      ORCHESTRATOR_URL: http://plex-orchestrator:3500
+      EAE_SUPPORT: "1"
+    healthcheck:
+      test: curl -fsS http://localhost:3501/health > /dev/null || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 240s
+    volumes:
+      - codecs:/codecs
+      - ./sample-content/tv:/data/tv
+      - ./sample-content/movies:/data/movies
+      - transcode-volume:/transcode
+volumes:
+  plex-config:
+  transcode-volume:
+  codecs:
