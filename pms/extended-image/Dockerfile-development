@@ -5,17 +5,21 @@ LABEL maintainer="pabloromeo"
 COPY /docker-mod/root/etc/ /etc/
 COPY /app /app
 
+RUN apt-get update && \
+    apt-get install -y dos2unix && \
+    dos2unix /etc/cont-init.d/* && \
+    dos2unix /etc/services.d/nginx/* && \
+    dos2unix /app/transcoder-shim.sh && \
+    apt-get remove -y dos2unix
+
 RUN bash /etc/cont-init.d/92-install-dependencies && \
     bash /etc/cont-init.d/93-npm-install && \
     rm /etc/cont-init.d/92-install-dependencies && \
     rm /etc/cont-init.d/93-npm-install && \
     echo "**** cleanup ****" && \
     rm -rf \
-    /tmp/* \
-    /var/lib/apt/lists/* \
-    /var/tmp/*
+        /tmp/* \
+        /var/lib/apt/lists/* \
+        /var/tmp/*
 
-EXPOSE 3501
-
-VOLUME /codecs
-
+WORKDIR /
