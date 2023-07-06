@@ -2,8 +2,6 @@ name: Release Charts
 
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*.*.*'
 
@@ -54,7 +52,7 @@ jobs:
         shell: bash
         working-directory: dest
         run: |
-          helm repo index . --url https://pabloromeo.github.io/clusterplex
+          helm repo index --url https://pabloromeo.github.io/clusterplex --merge index.yaml .
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4

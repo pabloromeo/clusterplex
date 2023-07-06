@@ -36,7 +36,7 @@ global:
       # If set to something else, the given storageClass is used.
       # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
       # NOTE: This class must support ReadWriteMany otherwise you will encounter errors.
-      storageClass: # "-"
+      storageClass: ceph-filesystem
 
       # -- If you want to reuse an existing claim, the name of the existing PVC can be passed here.
       existingClaim: # your-claim
@@ -62,7 +62,7 @@ global:
       # If set to something else, the given storageClass is used.
       # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
       # NOTE: This class must support ReadWriteMany otherwise you will encounter errors.
-      storageClass: # "-"
+      storageClass: ceph-filesystem
 
       # -- If you want to reuse an existing claim, the name of the existing PVC can be passed here.
       existingClaim: # your-claim
@@ -132,7 +132,7 @@ pms:
     # -- Enable or disable the local relay function. In most cases this should be left to the default (true).
     # If you disable this, you must add the pod IP address of each worker or the pod network CIDR to Plex under the
     # `List of IP addresses and networks that are allowed without auth` option in Plex's network configuration.
-    localRelayEnabled: true
+    localRelayEnabled: false
 
     # -- The port that the relay service will listen on
     relayPort: 32499
@@ -407,7 +407,7 @@ worker:
   # @default -- See below
   config:
     # -- The number of instances of the worker to run
-    replicas: 2
+    replicas: 0
 
     # -- The port the worker will expose its metrics on for the orchestrator to find
     port: 3501
