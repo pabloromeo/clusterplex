@@ -5,6 +5,12 @@ LABEL maintainer="pabloromeo"
 COPY /docker-mod/root/etc/ /etc/
 COPY /app /app
 
+RUN apt-get update && \
+    apt-get install -y dos2unix && \
+    dos2unix /etc/cont-init.d/* && \
+    dos2unix /app/start.sh && \
+    apt-get remove -y dos2unix
+
 RUN bash /etc/cont-init.d/92-install-dependencies && \
     bash /etc/cont-init.d/93-npm-install && \
     rm /etc/cont-init.d/92-install-dependencies && \
