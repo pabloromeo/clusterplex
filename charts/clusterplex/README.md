@@ -1,6 +1,6 @@
 # clusterplex
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.4](https://img.shields.io/badge/AppVersion-1.4.4-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.5](https://img.shields.io/badge/AppVersion-1.4.5-informational?style=flat-square)
 
 ClusterPlex is basically an extended version of Plex, which supports distributed Workers across a cluster to handle transcoding requests.
 
@@ -67,11 +67,13 @@ $ helm install clusterplex clusterplex/clusterplex
 | pms.env | string | `nil` | Additional environment variables. Template enabled. Syntax options: A) TZ: UTC B) PASSWD: '{{ .Release.Name }}' C) PASSWD:      configMapKeyRef:        name: config-map-name        key: key-name D) PASSWD:      valueFrom:        secretKeyRef:          name: secret-name          key: key-name      ... E) - name: TZ      value: UTC F) - name: TZ      value: '{{ .Release.Name }}' |
 | pms.config | object | See below | Supply the configuration items used to configure the PMS component |
 | pms.config.transcoderVerbose | int | `1` | Set this to 1 if you want only info logging from the transcoder or 0 if you want debugging logs |
-| pms.config.transcodeOperatingMode | string | `"both"` | Set the transcode operating mode. Valid options are local (No workers), remote (only remote workers), both (default, remote first then local if remote fails). You MUST set this to local if you disable the worker installation. |
+| pms.config.transcodeOperatingMode | string | `"both"` | Set the transcode operating mode. Valid options are local (No workers), remote (only remote workers), both (default, remote first then local if remote fails). If you disable the worker then this will be set to local automatically as that is the only valid option for that confguration. |
 | pms.config.plexClaimToken | string | `nil` | Set the Plex claim token obtained from https://plex.tv/claim |
 | pms.config.version | string | `"docker"` | Set the version of Plex to use. Valid options are docker, latest, public, or a specific version. [[ref](https://github.com/linuxserver/docker-plex#application-setup)] |
 | pms.config.port | int | `32400` | The port that Plex will listen on |
+| pms.config.localRelayEnabled | bool | `true` | Enable or disable the local relay function. In most cases this should be left to the default (true). If you disable this, you must add the pod IP address of each worker or the pod network CIDR to Plex under the `List of IP addresses and networks that are allowed without auth` option in Plex's network configuration. |
 | pms.config.relayPort | int | `32499` | The port that the relay service will listen on |
+| pms.config.pmsIP | string | `""` | The IP address that plex is using. This is only utilized if you disable the localRelayEnabled option above. |
 | pms.serviceConfig | object | See below | Configure the kubernetes service associated with the the PMS component |
 | pms.serviceConfig.externalTrafficPolicy | string | `nil` | Specify the externalTrafficPolicy for the service. Options: Cluster, Local [[ref](https://kubernetes.io/docs/tutorials/services/source-ip/)] |
 | pms.serviceConfig.annotations | object | `{}` | Provide additional annotations which may be required. |
