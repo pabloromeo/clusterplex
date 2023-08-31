@@ -14,10 +14,14 @@ on:
       - "experimental"
     tags:
       - "v*.*.*"
+    paths-ignore:
+      - 'charts/**'
   pull_request:
     branches:
       - "master"
       - "dev"
+    paths-ignore:
+      - 'charts/**'
 
 permissions:
   contents: read

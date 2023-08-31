@@ -17,12 +17,27 @@ configMaps:
       PUID: '{{ .Values.global.PUID | default "1000" }}'
       DOCKER_MODS: 'ghcr.io/pabloromeo/clusterplex_dockermod:{{ .Values.global.clusterplexVersion | default .Chart.AppVersion }}'
       ORCHESTRATOR_URL: 'http://{{ .Release.Name }}-orchestrator:{{ .Values.orchestrator.config.port | default "3500" }}'
+      {{ if .Values.pms.config.localRelayEnabled }}
       PMS_SERVICE: '{{ .Release.Name }}-pms'
+      {{ else }}
+      {{- if not (regexMatch "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$" .Values.pms.config.pmsIP) }}
+      {{- fail "Invalid or empty pmsIP provided. This must be a valid IP address if localRelayEnabled is false." }}
+      {{- end }}
+      PMS_IP: '{{ .Values.pms.config.pmsIP }}'
+      {{- end }}
       PMS_PORT: '{{ .Values.pms.config.port | default "32400" }}'
       TRANSCODER_VERBOSE: '{{ .Values.pms.config.transcoderVerbose | default "1" }}'
+      {{ if .Values.worker.enabled }}
       TRANSCODE_OPERATING_MODE: '{{ .Values.pms.config.transcodeOperatingMode | default "both" }}'
+      {{ else }}
+      TRANSCODE_OPERATING_MODE: 'local'
+      {{- end }}
+      {{ if .Values.pms.config.localRelayEnabled }}
       LOCAL_RELAY_ENABLED: '1'
       LOCAL_RELAY_PORT: '{{ .Values.pms.config.relayPort | default "32499" }}'
+      {{ else }}
+      LOCAL_RELAY_ENABLED: '0'
+      {{- end }}
 
 {{ if .Values.pms.config.plexClaimToken }}
 secrets:
