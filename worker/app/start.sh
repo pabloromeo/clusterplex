@@ -5,7 +5,7 @@ cd /usr/lib/plexmediaserver
 CLUSTERPLEX_PLEX_VERSION=$(strings "pms_original" | grep -P '^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)-[0-9a-f]{9}')
 CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Transcoder" | grep -Po '[0-9a-f]{7}-[0-9]{4}$')
 CLUSTERPLEX_PLEX_EAE_VERSION=$(printf "eae-`strings "pms_original" | grep -P '^EasyAudioEncoder-eae-[0-9a-f]{7}-$' | cut -d- -f3`-42")
-EAE_VERSION=1785 # fixed for now
+EAE_VERSION=1978 # fixed for now
 
 echo "CLUSTERPLEX_PLEX_VERSION => '${CLUSTERPLEX_PLEX_VERSION}'"
 echo "CLUSTERPLEX_PLEX_CODECS_VERSION => '${CLUSTERPLEX_PLEX_CODECS_VERSION}'"
@@ -43,14 +43,38 @@ if [ "$EAE_SUPPORT" == "0" ] || [ "$EAE_SUPPORT" == "false" ]
 then
   echo "EAE_SUPPORT is turned off => ${EAE_SUPPORT}, skipping EasyAudioEncoder download"
 else
-  if [ -d "${CODEC_PATH}/EasyAudioEncoder" ]
-  then
-    echo "EasyAudioEncoder already present"
+  # Check if the EAE_VERSION.txt file exists
+  if [[ -f "EAE_VERSION.txt" ]]; then
+    # Read the contents of the file into a variable
+    eae_version_file=$(cat EAE_VERSION.txt)
+    echo "Found EAE_VERSION.txt => ${eae_version_file}"
   else
+    # Set eae_version_file to an empty string
+    eae_version_file=""
+    echo "EAE_VERSION.txt not found"
+  fi
+
+  # Compare the eae_version_file contents with the variable
+  if [[ "$eae_version_file" == "$EAE_VERSION" ]]; then
+    echo "EAE is up to date"
+  else
+    echo "EAE is not the latest version"
+
+    # Check if the directory exists
+    if [[ -d "${CODEC_PATH}/EasyAudioEncoder" ]]; then
+        # Remove the directory recursively
+        echo "Deleting Old EAE"
+        rm -rf "${CODEC_PATH}/EasyAudioEncoder"
+    else
+        echo "EasyAudioEncoder directory does not exist, skipped deletion"
+    fi
+
     echo "Downloading EasyAudioEncoder version => ${EAE_VERSION}"
     UUID=$(cat /proc/sys/kernel/random/uuid)
     # download eae definition to eae.xml
-    curl -s -o eae.xml "https://plex.tv/api/codecs/easyaudioencoder?build=${CLUSTERPLEX_PLEX_CODEC_ARCH}&deviceId=${UUID}&oldestPreviousVersion=${CLUSTERPLEX_PLEX_VERSION}&version=${EAE_VERSION}"
+    EAE_XML="https://plex.tv/api/codecs/easyaudioencoder?build=${CLUSTERPLEX_PLEX_CODEC_ARCH}&deviceId=${UUID}&oldestPreviousVersion=${CLUSTERPLEX_PLEX_VERSION}&version=${EAE_VERSION}"
+    echo "Downloading EAE_XML => ${EAE_XML}"
+    curl -s -o eae.xml "${EAE_XML}"
 
     # extract codec url
     EAE_CODEC_URL=$(grep -Pio 'Codec url="\K[^"]*' eae.xml)
@@ -66,6 +90,10 @@ else
     EAE_LICENSE_PATH="${CODEC_PATH}/EasyAudioEncoder/EasyAudioEncoder/eae-license.txt"
     echo "License Path output => ${EAE_LICENSE_PATH}"
     echo $EAE_LICENSE_CONTENT >> $EAE_LICENSE_PATH
+    
+    # save eae version to file
+    echo $EAE_VERSION > EAE_VERSION.txt
+    echo "EAE_VERSION.txt saved"
   fi
 fi
 
