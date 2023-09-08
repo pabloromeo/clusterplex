@@ -3,14 +3,14 @@ entries:
   clusterplex:
   - apiVersion: v2
     appVersion: 1.4.5
-    created: "2023-07-08T03:20:51.949264041Z"
+    created: "2023-09-08T12:39:53.493688622Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
       version: 1.5.1
     description: ClusterPlex is basically an extended version of Plex, which supports
       distributed Workers across a cluster to handle transcoding requests.
-    digest: aa70ec166c7e6446072159c8b65a2d7a950438fb63aaf68a6a08ebb4b923cd54
+    digest: a738bb2b17dbe17f73d512f074db5c278e94326ff9340a36b158aa4f46011d55
     home: https://github.com/pabloromeo/clusterplex/charts/clusterplex
     kubeVersion: '>=1.24.0-0'
     name: clusterplex
@@ -24,7 +24,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.4.5
-    created: "2023-07-08T03:20:51.944682784Z"
+    created: "2023-09-08T12:39:53.489835892Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -45,7 +45,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.4.4
-    created: "2023-07-08T03:20:51.940195129Z"
+    created: "2023-09-08T12:39:53.485396158Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -64,4 +64,4 @@ entries:
     urls:
     - https://pabloromeo.github.io/clusterplex/clusterplex-1.0.0.tgz
     version: 1.0.0
-generated: "2023-07-08T03:20:51.933919051Z"
+generated: "2023-09-08T12:39:53.478648407Z"
