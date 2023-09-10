@@ -40,9 +40,10 @@ service:
         port: '{{ .Values.orchestrator.config.port | default "3500" }}'
         protocol: TCP
 
+{{- if .Values.orchestrator.prometheusServiceMonitor.enabled }}
 serviceMonitor:
   main:
-    enabled: '{{ .Values.orchestrator.prometheusServiceMonitor.enabled | default "false" }}'
+    enabled: true
     annotations:
       {{- toYaml .Values.orchestrator.prometheusServiceMonitor.annotations | nindent 6 }}
     labels:
@@ -56,6 +57,7 @@ serviceMonitor:
         path: /metrics
         interval: '{{ .Values.orchestrator.prometheusServiceMonitor.scrapeInterval | default "30s" }}'
         scrapeTimeout: '{{ .Values.orchestrator.prometheusServiceMonitor.scrapeTimeout | default "10s" }}'
+{{- end }}
 
 probes:
   {{ if .Values.orchestrator.healthProbes.startup }}
