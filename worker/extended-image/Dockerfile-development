@@ -1,5 +1,7 @@
 FROM linuxserver/plex:latest
 
+ARG EXTRA_APT_INSTALLS=""
+
 LABEL maintainer="pabloromeo"
 
 COPY /docker-mod/root/etc/ /etc/
@@ -10,6 +12,8 @@ RUN apt-get update && \
     dos2unix /etc/cont-init.d/* && \
     dos2unix /app/start.sh && \
     apt-get remove -y dos2unix
+
+ENV EXTRA_APT_INSTALLS $EXTRA_APT_INSTALLS
 
 RUN bash /etc/cont-init.d/92-install-dependencies && \
     bash /etc/cont-init.d/93-npm-install && \

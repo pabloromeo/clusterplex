@@ -13,5 +13,11 @@ else
     curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
     echo "**** install nodejs ****"
     bash n lts
+    if [ -n "$EXTRA_APT_INSTALLS" ]; then
+        echo "**** EXTRA_APT_INSTALLS is set, installing '${EXTRA_APT_INSTALLS}' ... ****"
+        apt-get install -y $EXTRA_APT_INSTALLS
+    else
+        echo "**** EXTRA_APT_INSTALLS is not set, skipping... ****"
+    fi
 fi
 
