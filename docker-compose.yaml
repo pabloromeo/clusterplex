@@ -78,7 +78,6 @@ services:
             STAT_CPU_INTERVAL: 2000 # interval for reporting worker load metrics
             ORCHESTRATOR_URL: http://plex-orchestrator:3500
             EAE_SUPPORT: "1"
-            TRANSCODER_ENV_OVERRIDES: "LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri"
         healthcheck:
             test: curl -fsS http://localhost:3501/health > /dev/null || exit 1
             interval: 15s

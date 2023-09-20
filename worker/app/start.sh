@@ -5,7 +5,8 @@ cd /usr/lib/plexmediaserver
 CLUSTERPLEX_PLEX_VERSION=$(strings "pms_original" | grep -P '^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)-[0-9a-f]{9}')
 CLUSTERPLEX_PLEX_CODECS_VERSION=$(strings "Plex Transcoder" | grep -Po '[0-9a-f]{7}-[0-9]{4}$')
 CLUSTERPLEX_PLEX_EAE_VERSION=$(printf "eae-`strings "pms_original" | grep -P '^EasyAudioEncoder-eae-[0-9a-f]{7}-$' | cut -d- -f3`-42")
-EAE_VERSION=1978 # fixed for now
+
+EAE_VERSION="${EAE_VERSION_NUMBER:=1983}" # default fixed for now
 
 echo "CLUSTERPLEX_PLEX_VERSION => '${CLUSTERPLEX_PLEX_VERSION}'"
 echo "CLUSTERPLEX_PLEX_CODECS_VERSION => '${CLUSTERPLEX_PLEX_CODECS_VERSION}'"
