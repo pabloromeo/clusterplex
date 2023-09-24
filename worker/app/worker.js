@@ -142,19 +142,18 @@ socket.on("worker.task.request", (taskRequest) => {
 				childEAE.on("error", (err) => {
 					console.error("EAE Support - EAE failed:");
 					console.error(err);
+					deleteEAE_PID();
 				});
 				childEAE.on("close", () => {
 					console.log("EAE Support - Closing");
+					deleteEAE_PID();
 				});
 				childEAE.on("exit", () => {
 					console.log("EAE Support - Exiting");
+					deleteEAE_PID();
 				});
 
-				console.log("EAE Support - Writing PID file");
-				fs.writeFileSync(
-					`${EAE_EXECUTABLE}.pid`,
-					childEAE.pid.toString()
-				);
+				createEAE_PID(childEAE.pid.toString());
 			}
 		}
 
@@ -245,7 +244,18 @@ socket.on("disconnect", () => {
 ON_DEATH((signal, err) => {
 	console.log("ON_DEATH signal detected");
 	console.error(err);
-	console.log("Removing EAE PID file");
-	fs.unlinkSync(`${EAE_EXECUTABLE}.pid`);
+	deleteEAE_PID();
 	process.exit(signal);
 });
+
+function deleteEAE_PID() {
+	if (fs.existsSync(`${EAE_EXECUTABLE}.pid`)) {
+		console.log("Removing EAE PID file");
+		fs.unlinkSync(`${EAE_EXECUTABLE}.pid`);
+	}
+}
+
+function createEAE_PID(pid) {
+	console.log("EAE Support - Writing PID file");
+	fs.writeFileSync(`${EAE_EXECUTABLE}.pid`, pid);
+}
