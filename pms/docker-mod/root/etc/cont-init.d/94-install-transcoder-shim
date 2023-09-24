@@ -12,3 +12,6 @@ cp /app/transcoder-shim.sh /usr/lib/plexmediaserver/'Plex Transcoder'
 
 echo "**** Make the shim executable ****"
 chmod +x /usr/lib/plexmediaserver/'Plex Transcoder'
+
+echo "**** Make sentinel.sh executable ****"
+chmod +x /app/sentinel.sh
