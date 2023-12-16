@@ -3,14 +3,14 @@ entries:
   clusterplex:
   - apiVersion: v2
     appVersion: 1.4.7
-    created: "2023-09-20T03:02:42.245447897Z"
+    created: "2023-12-16T02:38:57.549677593Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
       version: 1.5.1
     description: ClusterPlex is basically an extended version of Plex, which supports
       distributed Workers across a cluster to handle transcoding requests.
-    digest: d37189fba5c446e0430b948d72fe64843e7ee1a594f0a3c6ec9f4b2eac230cba
+    digest: 7e41fdf42a93944047b67bdebe2f7b421515a8ce69124e1f8ec716b4f69e3852
     home: https://github.com/pabloromeo/clusterplex/charts/clusterplex
     kubeVersion: '>=1.24.0-0'
     name: clusterplex
@@ -24,7 +24,7 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.4.6
-    created: "2023-09-20T03:02:42.241630722Z"
+    created: "2023-12-16T02:38:57.546893881Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -45,7 +45,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.4.5
-    created: "2023-09-20T03:02:42.237734245Z"
+    created: "2023-12-16T02:38:57.542982777Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -66,7 +66,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.4.5
-    created: "2023-09-20T03:02:42.233080853Z"
+    created: "2023-12-16T02:38:57.540226876Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -87,7 +87,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.4.4
-    created: "2023-09-20T03:02:42.228962872Z"
+    created: "2023-12-16T02:38:57.537269731Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -106,4 +106,4 @@ entries:
     urls:
     - https://pabloromeo.github.io/clusterplex/clusterplex-1.0.0.tgz
     version: 1.0.0
-generated: "2023-09-20T03:02:42.224864091Z"
+generated: "2023-12-16T02:38:57.533465089Z"
