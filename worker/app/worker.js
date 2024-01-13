@@ -245,7 +245,22 @@ ON_DEATH((signal, err) => {
 	console.log("ON_DEATH signal detected");
 	console.error(err);
 	deleteEAE_PID();
-	process.exit(signal);
+	let exitCode = 0;
+	switch (signal) {
+		case "SIGINT":
+			exitCode = 130;
+			break;
+		case "SIGQUIT":
+			exitCode = 131;
+			break;
+		case "SIGTERM":
+			exitCode = 143;
+			break;
+		default:
+			exitCode = 1;
+			break;
+	}
+	process.exit(exitCode);
 });
 
 function deleteEAE_PID() {
