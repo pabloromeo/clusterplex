@@ -99,12 +99,14 @@ ingress:
 persistence:
   config:
     {{- toYaml .Values.pms.configVolume | nindent 4 }}
+  {{ if .Values.global.sharedStorage.transcode.enabled }}
   transcode:
     {{- toYaml .Values.global.sharedStorage.transcode | nindent 4 }}
     accessMode: ReadWriteMany
     {{ if not .Values.global.sharedStorage.transcode.existingClaim }}
     existingClaim: {{ .Release.Name }}-transcode
     {{- end }}
+  {{- end}}
   media:
     {{- toYaml .Values.global.sharedStorage.media | nindent 4 }}
     accessMode: ReadWriteMany
