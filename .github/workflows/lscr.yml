@@ -32,7 +32,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
@@ -41,20 +41,20 @@ jobs:
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Docker meta for PMS-dockermod
         id: meta_pms_dockermod
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -70,7 +70,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Build and push PMS-dockermod
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ./pms
           file: ./pms/docker-mod/Dockerfile
@@ -93,7 +93,7 @@ jobs:
     steps:
       # Get the repositery's code
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
@@ -102,21 +102,21 @@ jobs:
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker meta for worker-dockermod
         id: meta_worker_dockermod
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -132,7 +132,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Build and push worker-dockermod
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ./worker
           file: ./worker/docker-mod/Dockerfile
