@@ -56,7 +56,7 @@ jobs:
           helm repo index --url https://pabloromeo.github.io/clusterplex --merge index.yaml .
 
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit
         with:
           repository: dest
