@@ -37,7 +37,7 @@ jobs:
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
@@ -80,7 +80,7 @@ jobs:
           labels: ${{ steps.meta_pms_dockermod.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v3
+        uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -98,7 +98,7 @@ jobs:
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
@@ -142,7 +142,7 @@ jobs:
           labels: ${{ steps.meta_worker_dockermod.outputs.labels }}
       - name: Docker Hub Description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v3
+        uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
