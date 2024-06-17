@@ -78,7 +78,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Build and push PMS
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./pms
           file: ./pms/extended-image/Dockerfile
@@ -146,7 +146,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Build and push Worker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./worker
           file: ./worker/extended-image/Dockerfile
@@ -214,7 +214,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Build and push Orchestrator
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./orchestrator
           platforms: linux/amd64,linux/arm64
