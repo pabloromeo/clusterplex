@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** starting nginx ****"
+/usr/sbin/nginx -g 'daemon off;'

@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** unlink nginx default ****"
+unlink /etc/nginx/sites-enabled/default
+echo "**** link nginx forward-proxy ****"
+ln -s /etc/nginx/sites-available/forward-proxy.conf /etc/nginx/sites-enabled/forward-proxy.conf
+
+echo "**** configuring nginx (for Local Relay) forwarding ports ****"
+echo "PMS_PORT => '${PMS_PORT}'"
+echo "LOCAL_RELAY_PORT => '${LOCAL_RELAY_PORT}'"
+
+sed -i 's/_PMS_PORT/'"${PMS_PORT:-32400}"'/g' /etc/nginx/sites-available/forward-proxy.conf
+sed -i 's/_LOCAL_RELAY_PORT/'"${LOCAL_RELAY_PORT:-32499}"'/g' /etc/nginx/sites-available/forward-proxy.conf
+
+echo "**** nginx configuration complete ****"
