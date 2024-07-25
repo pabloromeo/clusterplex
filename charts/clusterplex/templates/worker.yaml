@@ -8,7 +8,7 @@ image:
   imagePullPolicy: '{{ .Values.global.plexImage.imagePullPolicy }}'
 
 controller:
-  type: statefulset
+  type: '{{ .Values.worker.config.type | default "statefulset" }}'
   {{- if and .Values.worker.enabled (lt (.Values.worker.config.replicas | int) 1) }}
   {{- fail "Invalid value for worker.config.replicas. Must be greater than or equal to 1 when worker.enabled is true." }}
   {{- end }}
@@ -67,6 +67,9 @@ service:
         protocol: TCP
 
 persistence:
+  codecs:
+    {{- toYaml .Values.worker.codecVolumes | nindent 4 }}
+    enabled: {{ and .Values.worker.codecVolumes.enabled (eq .Values.worker.config.type "deployment") }}
   transcode:
     {{- toYaml .Values.global.sharedStorage.transcode | nindent 4 }}
     accessMode: ReadWriteMany
