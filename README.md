@@ -1,6 +1,6 @@
 # clusterplex
 
-![Version: 1.1.7](https://img.shields.io/badge/Version-1.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.12](https://img.shields.io/badge/AppVersion-1.4.12-informational?style=flat-square)
+![Version: 1.1.8](https://img.shields.io/badge/Version-1.1.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.13](https://img.shields.io/badge/AppVersion-1.4.13-informational?style=flat-square)
 
 ClusterPlex is basically an extended version of Plex, which supports distributed Workers across a cluster to handle transcoding requests.
 
