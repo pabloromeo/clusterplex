@@ -75,21 +75,22 @@ service:
     labels:
       {{- toYaml .Values.pms.serviceConfig.labels | nindent 6 }}
     ports:
-    {{ if .Values.pms.serviceConfig.enableHttpPorts }}
       http:
+        enabled: false
+        primary: false
+    {{ if .Values.pms.serviceConfig.enableHttpPorts }}
+      plex-http:
         enabled: true
         primary: false
         port: 80
         targetPort: 32400
-      https:
+        protocol: TCP
+      plex-https:
         enabled: true
         primary: false
         port: 443
         targetPort: 32400
-    {{ else }}
-      http:
-        enabled: false
-        primary: false
+        protocol: TCP
     {{- end}}
       plex:
         enabled: true
