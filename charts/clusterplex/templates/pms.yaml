@@ -113,6 +113,13 @@ persistence:
     {{ if not .Values.global.sharedStorage.media.existingClaim }}
     existingClaim: {{ .Release.Name }}-media
     {{- end }}
+  {{ if .Values.pms.config.sslSecret }}
+  ssl:
+    enabled: true
+    type: secret
+    name: {{ .Values.pms.config.sslSecret }}
+    mountPath: /ssl
+  {{- end }}
 {{- range $key, $value := .Values.global.sharedStorage.additionalMediaVolumes -}}
   {{ $key | nindent 2}}:
     {{- toYaml $value | nindent 4 }}

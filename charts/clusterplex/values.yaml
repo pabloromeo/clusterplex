@@ -140,6 +140,10 @@ pms:
     # -- The IP address that plex is using. This is only utilized if you disable the localRelayEnabled option above.
     pmsIP: ""
 
+    # -- kubernetes secert for SSL certificate, should contain a pkcs12 (.p12) key for Plex to use
+    # Secret will be mounted at `/ssl`
+    sslSecret: ""
+
   # -- Configure the kubernetes service associated with the the PMS component
   # @default -- See below
   serviceConfig:
