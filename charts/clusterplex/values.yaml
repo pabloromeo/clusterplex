@@ -160,6 +160,9 @@ pms:
     # -- Provide additional labels which may be required.
     labels: {}
 
+    # -- Enable ports 80/443 on service
+    enableHttpPorts: false
+
   # -- Configure the ingress for plex here.
   # @default -- See below
   ingressConfig:

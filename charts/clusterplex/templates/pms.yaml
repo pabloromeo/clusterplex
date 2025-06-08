@@ -78,6 +78,20 @@ service:
       http:
         enabled: false
         primary: false
+    {{ if .Values.pms.serviceConfig.enableHttpPorts }}
+      plex-http:
+        enabled: true
+        primary: false
+        port: 80
+        targetPort: 32400
+        protocol: TCP
+      plex-https:
+        enabled: true
+        primary: false
+        port: 443
+        targetPort: 32400
+        protocol: TCP
+    {{- end}}
       plex:
         enabled: true
         primary: true
