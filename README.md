@@ -20,7 +20,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://bjw-s.github.io/helm-charts | common | 1.5.1 |
+| https://bjw-s-labs.github.io/helm-charts | common | 1.5.1 |
 
 <br>
 
@@ -74,10 +74,12 @@ $ helm install clusterplex clusterplex/clusterplex
 | pms.config.localRelayEnabled | bool | `true` | Enable or disable the local relay function. In most cases this should be left to the default (true). If you disable this, you must add the pod IP address of each worker or the pod network CIDR to Plex under the `List of IP addresses and networks that are allowed without auth` option in Plex's network configuration. |
 | pms.config.relayPort | int | `32499` | The port that the relay service will listen on |
 | pms.config.pmsIP | string | `""` | The IP address that plex is using. This is only utilized if you disable the localRelayEnabled option above. |
+| pms.config.sslSecret | string | `""` | kubernetes secert for SSL certificate, should contain a pkcs12 (.p12) key for Plex to use Secret will be mounted at `/ssl` |
 | pms.serviceConfig | object | See below | Configure the kubernetes service associated with the the PMS component |
 | pms.serviceConfig.externalTrafficPolicy | string | `nil` | Specify the externalTrafficPolicy for the service. Options: Cluster, Local [[ref](https://kubernetes.io/docs/tutorials/services/source-ip/)] |
 | pms.serviceConfig.annotations | object | `{}` | Provide additional annotations which may be required. |
 | pms.serviceConfig.labels | object | `{}` | Provide additional labels which may be required. |
+| pms.serviceConfig.enableHttpPorts | bool | `false` | Enable ports 80/443 on service |
 | pms.ingressConfig | object | See below | Configure the ingress for plex here. |
 | pms.ingressConfig.enabled | bool | `false` | Enables or disables the ingress |
 | pms.ingressConfig.annotations | object | `{}` | Provide additional annotations which may be required. |
