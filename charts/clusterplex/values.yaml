@@ -425,6 +425,9 @@ worker:
     # -- Controls usage of the EasyAudioDecoder 1 = ON (default) and 0 = OFF
     eaeSupport: 1
 
+    # -- Determines which controller to use for deploying workers (`statefulset` or `deployment`). Note that `worker.codecVolumes` may require additional configuration when using `deployment`, otherwise codecs will be fetched on every Pod startup.
+    type: statefulset
+
   # -- Configure the kubernetes service associated with the the PMS component
   # @default -- See below
   serviceConfig:
