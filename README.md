@@ -143,6 +143,7 @@ $ helm install clusterplex clusterplex/clusterplex
 | worker.config.port | int | `3501` | The port the worker will expose its metrics on for the orchestrator to find |
 | worker.config.cpuStatInterval | int | `10000` | The frequency at which workers send stats to the orchestrator in ms |
 | worker.config.eaeSupport | int | `1` | Controls usage of the EasyAudioDecoder 1 = ON (default) and 0 = OFF |
+| worker.config.type | string | `"statefulset"` | Determines which controller to use for deploying workers (`statefulset` or `deployment`). Note that `worker.codecVolumes` may require additional configuration when using `deployment`, otherwise codecs will be fetched on every Pod startup. |
 | worker.serviceConfig | object | See below | Configure the kubernetes service associated with the the PMS component |
 | worker.serviceConfig.externalTrafficPolicy | string | `nil` | Specify the externalTrafficPolicy for the service. Options: Cluster, Local [[ref](https://kubernetes.io/docs/tutorials/services/source-ip/)] |
 | worker.serviceConfig.annotations | object | `{}` | Provide additional annotations which may be required. |

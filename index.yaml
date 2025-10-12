@@ -3,14 +3,14 @@ entries:
   clusterplex:
   - apiVersion: v2
     appVersion: 1.4.15
-    created: "2025-06-09T17:08:01.410401421Z"
+    created: "2025-10-12T04:33:34.920490146Z"
     dependencies:
     - name: common
       repository: https://bjw-s-labs.github.io/helm-charts
       version: 1.5.1
     description: ClusterPlex is basically an extended version of Plex, which supports
       distributed Workers across a cluster to handle transcoding requests.
-    digest: 7cd7e9d9ffbed475626cd71bcdf5dba3388e1f775aabe14af5df3b800adab3e6
+    digest: f6bb96a855cd8ff4eeec185861b0d3af68e552f3847d9fb3066be19d2bff8e8a
     home: https://github.com/pabloromeo/clusterplex/charts/clusterplex
     kubeVersion: '>=1.24.0-0'
     name: clusterplex
@@ -24,7 +24,7 @@ entries:
     version: 1.1.9
   - apiVersion: v2
     appVersion: 1.4.13
-    created: "2025-06-09T17:08:01.40761652Z"
+    created: "2025-10-12T04:33:34.917158471Z"
     dependencies:
     - name: common
       repository: https://bjw-s-labs.github.io/helm-charts
@@ -45,7 +45,7 @@ entries:
     version: 1.1.8
   - apiVersion: v2
     appVersion: 1.4.12
-    created: "2025-06-09T17:08:01.403847686Z"
+    created: "2025-10-12T04:33:34.91444806Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -66,7 +66,7 @@ entries:
     version: 1.1.7
   - apiVersion: v2
     appVersion: 1.4.11
-    created: "2025-06-09T17:08:01.401116508Z"
+    created: "2025-10-12T04:33:34.911720426Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -87,7 +87,7 @@ entries:
     version: 1.1.6
   - apiVersion: v2
     appVersion: 1.4.10
-    created: "2025-06-09T17:08:01.398343329Z"
+    created: "2025-10-12T04:33:34.908485376Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -108,7 +108,7 @@ entries:
     version: 1.1.5
   - apiVersion: v2
     appVersion: 1.4.9
-    created: "2025-06-09T17:08:01.395561574Z"
+    created: "2025-10-12T04:33:34.905516721Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -129,7 +129,7 @@ entries:
     version: 1.1.4
   - apiVersion: v2
     appVersion: 1.4.8
-    created: "2025-06-09T17:08:01.391661061Z"
+    created: "2025-10-12T04:33:34.902783137Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -150,7 +150,7 @@ entries:
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.4.7
-    created: "2025-06-09T17:08:01.388822036Z"
+    created: "2025-10-12T04:33:34.899087981Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -171,7 +171,7 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.4.6
-    created: "2025-06-09T17:08:01.385716648Z"
+    created: "2025-10-12T04:33:34.896135667Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -192,7 +192,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.4.5
-    created: "2025-06-09T17:08:01.381295382Z"
+    created: "2025-10-12T04:33:34.893367799Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -213,7 +213,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.4.5
-    created: "2025-06-09T17:08:01.37847891Z"
+    created: "2025-10-12T04:33:34.890018574Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -234,7 +234,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.4.4
-    created: "2025-06-09T17:08:01.375671926Z"
+    created: "2025-10-12T04:33:34.88732787Z"
     dependencies:
     - name: common
       repository: https://bjw-s.github.io/helm-charts
@@ -253,4 +253,4 @@ entries:
     urls:
     - https://pabloromeo.github.io/clusterplex/clusterplex-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-09T17:08:01.37264535Z"
+generated: "2025-10-12T04:33:34.884349117Z"
