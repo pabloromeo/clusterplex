@@ -1,16 +1,15 @@
 #!/usr/bin/with-contenv bash
 
-if which node > /dev/null
-then
-    echo "**** node is installed, skipping... ****"
-else
-    echo "**** install runtime packages ****"
-    echo "**** apt-get update ****"
+set -e
+export DEBIAN_FRONTEND=noninteractive
+
+if ! command -v node >/dev/null 2>&1 || ! command -v haproxy >/dev/null 2>&1; then
     apt-get update
-    echo "**** install libatomic1, file, nginx ****"
-    apt-get install -y libatomic1 file nginx
-    echo "**** install 'n' ****"
-    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
-    echo "**** install nodejs ****"
-    bash n lts
+    apt-get -y -o Dpkg::Options::=--force-confold -o Dpkg::Use-Pty=0 \
+        install libatomic1 file haproxy
+
+    if ! command -v node >/dev/null 2>&1; then
+        curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
+        bash n lts
+    fi
 fi

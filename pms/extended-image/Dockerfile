@@ -10,7 +10,7 @@ RUN bash /etc/s6-overlay/s6-rc.d/1-install-dependencies/run && \
     rm -rf /etc/s6-overlay/s6-rc.d/1-install-dependencies && \
     rm -rf /etc/s6-overlay/s6-rc.d/2-npm-install && \
     rm -rf /etc/s6-overlay/s6-rc.d/3-install-transcoder-shim/dependencies.d && \
-    rm -rf /etc/s6-overlay/s6-rc.d/4-setup-nginx/dependencies.d && \
+    rm -rf /etc/s6-overlay/s6-rc.d/4-setup-relay/dependencies.d && \
     rm /etc/s6-overlay/s6-rc.d/user/contents.d/1-install-dependencies && \
     rm /etc/s6-overlay/s6-rc.d/user/contents.d/2-npm-install && \
     echo "**** cleanup ****" && \

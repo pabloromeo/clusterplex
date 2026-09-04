@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** starting HAProxy Local Relay ****"
+/usr/sbin/haproxy -db -f /etc/haproxy/haproxy.cfg

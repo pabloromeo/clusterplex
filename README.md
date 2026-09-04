@@ -33,7 +33,7 @@ It's made up of 3 parts:
 ![Overview](docs/images/overview.png)
 
 * In the customized PMS server, Plex’s own transcoder is renamed and a shim is put in its place which calls a small Node.js app that communicates with the Orchestrator container over websockets.
-Also, a Local Relay is installed (an NGINX forward-proxy) which forwards calls coming from Workers to PMS as if they were made locally.
+Also, a Local Relay is installed (an HAProxy HTTP forward-proxy) which forwards calls coming from Workers to PMS as if they were made locally.
 
 * The Orchestrator (Node.js application which receives all transcoding requests from PMS) forwards it to one of the active Workers available over websockets.
 
