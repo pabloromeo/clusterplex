@@ -16,6 +16,7 @@ The image extends the [LinuxServer Plex](https://hub.docker.com/r/linuxserver/pl
 | `ORCHESTRATOR_URL` | The url where the orchestrator service can be reached (ex: http://plex-orchestrator:3500) |
 | `PMS_SERVICE` or `PMS_IP` | Referencing Plex by Service name is allowed if `LOCAL_RELAY_ENABLED` is `"1"` (which is the default). If you are not using Local Relay then specify `PLEX_IP`, which also requires you to add the workers subnets to `"List of IP addresses and networks that are allowed without auth"` |
 | `TRANSCODE_EAE_LOCALLY` | `"true"` or `"false"`. Force media which requires EasyAudioEncoder to transcode locally. Given that EAE is currently supported by the latest versions of ClusterPlex there's usually no reason to enable this. It will most likely be deprecated in the future. Default => `"false"`|
+| `TRANSCODE_PREVIEWS_LOCALLY` | `"true"` or `"false"`. Force Plex video preview/chapter thumbnail generation to transcode locally. Default => `"true"`|
 | `TRANSCODE_OPERATING_MODE` | `"local"` => only local transcoding (no workers)<br/>`"remote"` => only remote workers transcoding<br/>`"both"` (default) => Remote first, local if it fails |
 | `TRANSCODER_VERBOSE` | `"0"` (default) => info level, `"1"` => debug logging |
 | `FORCE_HTTPS` | `"0"` (Default) uses Plex's default http callback, `"1"` forces HTTPS to be used.<br>**IMPORTANT:** Turning this on is only required if you have BOTH disabled Local Relay and have `Secure Connetions` in Plex set to `Required`. |

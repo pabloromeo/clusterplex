@@ -119,6 +119,9 @@ pms:
     # If you disable the worker then this will be set to local automatically as that is the only valid option for that confguration.
     transcodeOperatingMode: both
 
+    # -- Set this to true to force Plex video preview and chapter thumbnail generation to transcode locally.
+    transcodePreviewsLocally: true
+
     # -- Set the Plex claim token obtained from https://plex.tv/claim
     plexClaimToken:
 

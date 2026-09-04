@@ -19,6 +19,8 @@ const TRANSCODER_VERBOSE = process.env.TRANSCODER_VERBOSE || "0";
 // both
 const TRANSCODE_OPERATING_MODE = process.env.TRANSCODE_OPERATING_MODE || "both";
 const TRANSCODE_EAE_LOCALLY = process.env.TRANSCODE_EAE_LOCALLY || false;
+const TRANSCODE_PREVIEWS_LOCALLY =
+	process.env.TRANSCODE_PREVIEWS_LOCALLY || "true";
 const FORCE_HTTPS = process.env.FORCE_HTTPS || "0";
 
 // validations
@@ -57,6 +59,12 @@ if (TRANSCODE_OPERATING_MODE == "local") {
 	transcodeLocally(process.cwd(), process.argv.slice(2), process.env);
 } else if (process.cwd().indexOf("PlexCreditsDetection") > 0) {
 	console.log("PlexCreditsDetection so forcing local transcode");
+	transcodeLocally(process.cwd(), process.argv.slice(2), process.env);
+} else if (
+	TRANSCODE_PREVIEWS_LOCALLY == "true" &&
+	isPreviewTranscode(process.cwd(), process.argv.slice(2))
+) {
+	console.log("Preview generation detected: forcing local transcode");
 	transcodeLocally(process.cwd(), process.argv.slice(2), process.env);
 } else {
 	function setValueOf(arr, key, newValue) {
@@ -138,6 +146,16 @@ if (TRANSCODE_OPERATING_MODE == "local") {
 			}
 		}
 	);
+}
+
+function isPreviewTranscode(cwd, args) {
+	let previewCwd =
+		cwd.includes("/Media/localhost/") && /\/Indexes(?:\/|$)/.test(cwd);
+	let previewArgs = args.some(
+		(arg) => arg.includes("/Indexes/") || arg.includes("img-%06d.jpg")
+	);
+
+	return previewCwd || previewArgs;
 }
 
 function transcodeLocally(cwd, args, env) {

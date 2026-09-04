@@ -32,6 +32,7 @@ configMaps:
       {{ else }}
       TRANSCODE_OPERATING_MODE: 'local'
       {{- end }}
+      TRANSCODE_PREVIEWS_LOCALLY: '{{ ternary "true" "false" .Values.pms.config.transcodePreviewsLocally }}'
       {{ if .Values.pms.config.localRelayEnabled }}
       LOCAL_RELAY_ENABLED: '1'
       LOCAL_RELAY_PORT: '{{ .Values.pms.config.relayPort | default "32499" }}'

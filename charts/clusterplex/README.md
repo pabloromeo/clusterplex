@@ -99,6 +99,7 @@ $ helm install clusterplex clusterplex/clusterplex
 | pms.config.port | int | `32400` | The port that Plex will listen on |
 | pms.config.relayPort | int | `32499` | The port that the relay service will listen on |
 | pms.config.transcodeOperatingMode | string | `"both"` | Set the transcode operating mode. Valid options are local (No workers), remote (only remote workers), both (default, remote first then local if remote fails). If you disable the worker then this will be set to local automatically as that is the only valid option for that confguration. |
+| pms.config.transcodePreviewsLocally | bool | `true` | Set this to true to force Plex video preview and chapter thumbnail generation to transcode locally. |
 | pms.config.transcoderVerbose | int | `1` | Set this to 1 if you want only info logging from the transcoder or 0 if you want debugging logs |
 | pms.config.version | string | `"docker"` | Set the version of Plex to use. Valid options are docker, latest, public, or a specific version. [[ref](https://github.com/linuxserver/docker-plex#application-setup)] |
 | pms.configVolume | object | See below | Configure the volume that stores all the Plex configuration and metadata |
